@@ -1,4 +1,4 @@
-package me.stipe.fishslap;
+package me.stipe.fishslap.listeners;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

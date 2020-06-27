@@ -1,5 +1,6 @@
-package me.stipe.fishslap;
+package me.stipe.fishslap.managers;
 
+import me.stipe.fishslap.events.FishSlapEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -51,6 +52,10 @@ public class PlayerManager {
     }
 
     public void removePlayer(Player p) {
+
+    }
+
+    public void updateScores(FishSlapEvent event) {
 
     }
 

@@ -1,4 +1,4 @@
-package me.stipe.fishslap;
+package me.stipe.fishslap.fish;
 
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -18,6 +18,11 @@ public class Fish {
     public Fish(Player owner, ItemStack item) {
         this.owner = owner;
         this.item = item;
+
+        if (item == null) {
+            this.type = FishType.INVALID;
+            return;
+        }
 
         switch (item.getType()) {
             case COD:
@@ -50,6 +55,30 @@ public class Fish {
         }
         else
             this.xp = 0;
+
+    }
+
+    public FishType getType() {
+        return type;
+    }
+
+    public void addXp(int amount) {
+
+    }
+
+    public boolean isValid() {
+        return type != FishType.INVALID;
+    }
+
+    public boolean isOnCooldown() {
+        return (owner.hasCooldown(item.getType()));
+    }
+
+    private void levelUp() {
+
+    }
+
+    public void updateXpBar() {
 
     }
 }
