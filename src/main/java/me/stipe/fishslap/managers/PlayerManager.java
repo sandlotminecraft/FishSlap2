@@ -31,14 +31,14 @@ public class PlayerManager {
         health.setDisplaySlot(DisplaySlot.BELOW_NAME);
 
         spectatorBoard = manager.getNewScoreboard();
-        spectatorInfo = spectatorBoard.registerNewObjective("info", "dummy", "Come Play FishSlap!");
+        spectatorInfo = spectatorBoard.registerNewObjective("info", "dummy", ChatColor.GOLD + "Come Play FishSlap!");
         spectatorInfo.setDisplaySlot(DisplaySlot.SIDEBAR);
         spectatorInfo.getScore("").setScore(5);
         spectatorInfo.getScore("There is currently nobody playing").setScore(4);
         spectatorInfo.getScore("Current Top Score: 0").setScore(3);
         spectatorInfo.getScore(" ").setScore(2);
-        spectatorInfo.getScore(" Catch a fish and hold it in").setScore(1);
-        spectatorInfo.getScore(" your off hand to play!").setScore(0);
+        spectatorInfo.getScore(ChatColor.LIGHT_PURPLE + " Catch a fish and hold it in").setScore(1);
+        spectatorInfo.getScore(ChatColor.LIGHT_PURPLE + " your off hand to play!").setScore(0);
     }
 
     // manage scores

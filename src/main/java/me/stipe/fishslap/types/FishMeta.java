@@ -8,21 +8,34 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 
-public class LevelData {
-    private double damage;
-    private double armor;
-    private double speed;
-    private List<String> enchantmentStrings;
-    private List<String> equipEffectStrings;
-    private List<String> useEffectStrings;
-    private int useEffectDuration;
-    private int useEffectCooldown;
-    private int xp;
+public class FishMeta {
+    private final double damage;
+    private final double armor;
+    private final double attackSpeed;
+    private final double toughness;
+    private final double knockbackResist;
+    private final double luckBonus;
+    private final double healthBonus;
+    private final double speedBonus;
+    private final List<String> enchantmentStrings;
+    private final List<String> equipEffectStrings;
+    private final List<String> useEffectStrings;
+    private final int useEffectDuration;
+    private final int useEffectCooldown;
+    private final int xp;
 
-    public LevelData(double damage, double armor, double speed, String[] enchantmentStrings, String[] equipEffectStrings, String[] useEffectStrings, int useEffectDuration, int useEffectCooldown, int xp) {
+
+    public FishMeta(double damage, double armor, double attackSpeed, double toughness, double knockbackResist, double luckBonus, double healthBonus,
+                    double speedBonus, String[] enchantmentStrings, String[] equipEffectStrings, String[] useEffectStrings, int useEffectDuration,
+                    int useEffectCooldown, int xp) {
         this.damage = damage;
         this.armor = armor;
-        this.speed = speed;
+        this.attackSpeed = attackSpeed;
+        this.toughness = toughness;
+        this.knockbackResist = knockbackResist;
+        this.luckBonus = luckBonus;
+        this.healthBonus = healthBonus;
+        this.speedBonus = speedBonus;
         this.enchantmentStrings = Arrays.asList(enchantmentStrings);
         this.equipEffectStrings = Arrays.asList(equipEffectStrings);
         this.useEffectStrings = Arrays.asList(useEffectStrings);
@@ -31,10 +44,15 @@ public class LevelData {
         this.xp = xp;
     }
 
-    public LevelData(ConfigurationSection configData) {
+    public FishMeta(ConfigurationSection configData) {
         damage = configData.getDouble("damage");
         armor = configData.getDouble("armor");
-        speed = configData.getDouble("speed");
+        attackSpeed = configData.getDouble("attackSpeed");
+        toughness = configData.getDouble("toughness");
+        knockbackResist = configData.getDouble("knockbackResistance");
+        luckBonus = configData.getDouble("luck");
+        healthBonus = configData.getDouble("health");
+        speedBonus = configData.getDouble("speedBonus");
         enchantmentStrings = configData.getStringList("enchantments");
         equipEffectStrings = configData.getStringList("equipEffects");
         useEffectStrings = configData.getStringList("useEffects");
@@ -46,7 +64,12 @@ public class LevelData {
     public void createConfigSection(ConfigurationSection levelData) {
         levelData.set("damage", damage);
         levelData.set("armor", armor);
-        levelData.set("speed", speed);
+        levelData.set("attackSpeed", attackSpeed);
+        levelData.set("toughness", toughness);
+        levelData.set("knockbackResistance", knockbackResist);
+        levelData.set("luck", luckBonus);
+        levelData.set("health", healthBonus);
+        levelData.set("speedBonus", speedBonus);
         levelData.set("enchantments", enchantmentStrings);
         levelData.set("equipEffects", equipEffectStrings);
         levelData.set("useEffects", useEffectStrings);
@@ -55,8 +78,28 @@ public class LevelData {
         levelData.set("xp", xp);
     }
 
-    public double getSpeed() {
-        return speed;
+    public double getAttackSpeed() {
+        return attackSpeed;
+    }
+
+    public double getToughness() {
+        return toughness;
+    }
+
+    public double getKnockbackResist() {
+        return knockbackResist;
+    }
+
+    public double getLuckBonus() {
+        return luckBonus;
+    }
+
+    public double getHealthBonus() {
+        return healthBonus;
+    }
+
+    public double getSpeedBonus() {
+        return speedBonus;
     }
 
     public Map<Enchantment, Integer> getEnchantments() {
@@ -82,7 +125,7 @@ public class LevelData {
 
             if (type == null)
                 continue;
-            PotionEffect potionEffect = new PotionEffect(type, Integer.MAX_VALUE, amplifier, false, false);
+            PotionEffect potionEffect = new PotionEffect(type, Integer.MAX_VALUE, amplifier, false, false, true);
             effects.add(potionEffect);
         }
         return effects;
@@ -105,7 +148,7 @@ public class LevelData {
     }
 
     public double getAttackSpeedModifier() {
-        return speed - 4;
+        return attackSpeed - 4;
     }
 
     public double getDamage() {

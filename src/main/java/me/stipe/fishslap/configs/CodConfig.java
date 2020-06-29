@@ -1,13 +1,19 @@
 package me.stipe.fishslap.configs;
 
 import me.stipe.fishslap.types.FishConfig;
-import me.stipe.fishslap.types.LevelData;
+import me.stipe.fishslap.types.FishMeta;
 
 public class CodConfig extends FishConfig {
 
     private double[] defaultDamage = {1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
     private double[] defaultArmor = {1,2,3,4,5,6,7,8,9,10};
-    private double[] defaultSpeed = {1,1,1,1,1,1,1,1,1,1};
+    private double[] defaultAttackSpeed = {1,1.2,1.4,1.6,1.8,2,2.2,2.4,2.6,2.8};
+    private double[] defaultToughness = {0,1,2,3,4,5,6,7,8,9};
+    private double[] defaultKnockbackResist = {0,10,20,30,40,50,60,70,80,90};
+    private double[] defaultLuckBonus = {0,5,10,15,20,25,30,35,40,45};
+    private double[] defaultHealthBonus = {0,2,4,6,8,10,12,14,16,18};
+    private double[] defaultSpeedBonus = {0,1,2,3,4,5,8,10,15,20};
+
     private String[][] defaultEnchants = new String[][]{
             new String[]{"knockback 1"},
             new String[]{"knockback 1"},
@@ -18,7 +24,7 @@ public class CodConfig extends FishConfig {
             new String[]{"knockback 2"},
             new String[]{"knockback 2"},
             new String[]{"knockback 2"},
-            new String[]{"knockback 3"},
+            new String[]{"knockback 3", "poison 2"},
     };
     private String[][] defaultEquipEffects = new String[][]{
             new String[]{"damage_resistance 0"},
@@ -55,7 +61,8 @@ public class CodConfig extends FishConfig {
 
         displayName = "&9&oA Crusty Cod";
         for (int i = 0; i < defaultDamage.length; i++) {
-            fishStats.put(i + 1, new LevelData(defaultDamage[i], defaultArmor[i], defaultSpeed[i], defaultEnchants[i],
+            fishStats.put(i + 1, new FishMeta(defaultDamage[i], defaultArmor[i], defaultAttackSpeed[i], defaultToughness[i],
+                    defaultKnockbackResist[i]/100, defaultLuckBonus[i], defaultHealthBonus[i], defaultSpeedBonus[i]/100, defaultEnchants[i],
                     defaultEquipEffects[i], defaultUseEffects[i], defaultUseEffectDuration[i], defaultUseEffectCooldown[i], defaultXp[i]));
         }
     }

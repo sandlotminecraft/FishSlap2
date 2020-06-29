@@ -1,13 +1,14 @@
 package me.stipe.fishslap.listeners;
 
 import me.stipe.fishslap.FSApi;
-import me.stipe.fishslap.FishSlap;
 import me.stipe.fishslap.abilities.Cod;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.events.FishSlapEvent;
 import me.stipe.fishslap.managers.PlayerManager;
+import me.stipe.fishslap.types.Fish;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,6 +18,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 
 public class PlayerListener implements Listener {
 
@@ -26,11 +28,19 @@ public class PlayerListener implements Listener {
         FSApi.getPlayerManager().sendSpectatorScoreboard(event.getPlayer());
 
         Player p = event.getPlayer();
-        Cod cod = new Cod(p);
 
-        p.getInventory().addItem(cod.generateItem(1, 0));
-        p.getInventory().addItem(cod.generateItem(5, 200));
-        p.getInventory().addItem(cod.generateItem(10, 1900));
+        for (ItemStack item : p.getInventory().getContents())
+            if (item != null && item.getType() == Material.COD)
+                p.getInventory().removeItem(item);
+
+        for (ItemStack item : p.getInventory().getArmorContents())
+            if (item != null && item.getType() == Material.COD)
+                p.getInventory().removeItem(item);
+
+
+        p.getInventory().addItem(new Fish(Material.COD, 1, 25, p).generateItem());
+        p.getInventory().addItem(new Fish(Material.COD, 5, 256, p).generateItem());
+        p.getInventory().addItem(new Fish(Material.COD, 10, 1502, p).generateItem());
 
     }
 
@@ -88,13 +98,67 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onFishSlap(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
+            Player slapper = (Player) event.getDamager();
+
+            if (!Fish.isSpecialFish(slapper.getInventory().getItemInMainHand(), slapper))
+                return;
+
+            Fish fish = Fish.getFromItemStack(slapper.getInventory().getItemInMainHand(), slapper);
+            Player target = (Player) event.getEntity();
+            PlayerManager pm = FSApi.getPlayerManager();
+
+            if (fish == null || !pm.isPlaying(slapper) || !pm.isPlaying(target))
+                return;
+
+            FishSlapEvent fishSlapEvent = new FishSlapEvent(slapper, target, fish);
+            Bukkit.getPluginManager().callEvent(fishSlapEvent);
+
+            if (fishSlapEvent.isCancelled())
+                event.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void fishChangeByInventoryClick(InventoryClickEvent event) {
+        if (event.getSlot() != 40 || !(event.getWhoClicked() instanceof Player))
+            return;
+
+        Player p = (Player) event.getWhoClicked();
+        Fish oldFish = null;
+        Fish newFish = null;
+
+        if (event.getCurrentItem() != null)
+            oldFish = Fish.getFromItemStack(event.getCurrentItem(), p);
+        if (event.getCursor() != null)
+            newFish = Fish.getFromItemStack(event.getCursor(), p);
+
+        if (!(newFish == null && oldFish == null)) {
+            ChangeOffhandFishEvent changeOffhandFishEvent = new ChangeOffhandFishEvent(p, oldFish, newFish);
+            Bukkit.getPluginManager().callEvent(changeOffhandFishEvent);
+
+            if (changeOffhandFishEvent.isCancelled())
+                event.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void fishChangeByHotkey(PlayerSwapHandItemsEvent event) {
+        Player p = event.getPlayer();
+        Fish oldFish = null;
+        Fish newFish = null;
+
+        if (event.getOffHandItem() != null)
+            newFish = Fish.getFromItemStack(event.getOffHandItem(), p);
+        if (event.getMainHandItem() != null)
+            oldFish = Fish.getFromItemStack(event.getMainHandItem(), p);
+
+        if (!(newFish == null && oldFish == null)) {
+            ChangeOffhandFishEvent changeOffhandFishEvent = new ChangeOffhandFishEvent(p, oldFish, newFish);
+            Bukkit.getPluginManager().callEvent(changeOffhandFishEvent);
+
+            if (changeOffhandFishEvent.isCancelled())
+                event.setCancelled(true);
+        }
     }
 }

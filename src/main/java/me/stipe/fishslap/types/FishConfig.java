@@ -12,7 +12,7 @@ import java.util.Map;
 
 public abstract class FishConfig {
 
-    protected Map<Integer, LevelData> fishStats = new HashMap<>();
+    protected Map<Integer, FishMeta> fishStats = new HashMap<>();
     protected String displayName;
     protected String configFilename;
     protected YamlConfiguration config;
@@ -46,7 +46,7 @@ public abstract class FishConfig {
             if (levelData == null)
                 continue;
 
-            fishStats.put(Integer.parseInt(level), new LevelData(levelData));
+            fishStats.put(Integer.parseInt(level), new FishMeta(levelData));
             maxLevel = Integer.parseInt(level);
         }
     }
@@ -68,7 +68,7 @@ public abstract class FishConfig {
         }
     }
 
-    public LevelData getLevelData(int level) {
+    public FishMeta getLevelData(int level) {
         return fishStats.get(level);
     }
 
