@@ -33,3 +33,20 @@ Fish:
       8: 55
       9: 50
       10: 45
+
+Display Name: "&9&oA Crusty Cod"
+Levels:
+  1:
+    xp: 1000
+    damage: 1
+    armor: 1
+    speed: 1
+    enchantments:
+      - knockback 1
+      - fire_aspect 2
+    equipEffects:
+      - damage_resistance 1
+    useEffects:
+      - absorption 1
+    useEffectDuration: 10
+    useEffectCooldown: 60

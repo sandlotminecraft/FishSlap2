@@ -46,6 +46,10 @@ public class PlayerManager {
         Score score = topScores.getScore(ChatColor.stripColor(p.getDisplayName()));
     }
 
+    public void sendSpectatorScoreboard(Player p) {
+        p.setScoreboard(spectatorBoard);
+    }
+
     // add and remove players
     public void addPlayer(Player p) {
 

@@ -1,9 +1,10 @@
 package me.stipe.fishslap.listeners;
 
+import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.FishSlap;
+import me.stipe.fishslap.abilities.Cod;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.events.FishSlapEvent;
-import me.stipe.fishslap.fish.Fish;
 import me.stipe.fishslap.managers.PlayerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -22,6 +23,15 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         // send the spectator scoreboard
+        FSApi.getPlayerManager().sendSpectatorScoreboard(event.getPlayer());
+
+        Player p = event.getPlayer();
+        Cod cod = new Cod(p);
+
+        p.getInventory().addItem(cod.generateItem(1, 0));
+        p.getInventory().addItem(cod.generateItem(5, 200));
+        p.getInventory().addItem(cod.generateItem(10, 1900));
+
     }
 
     @EventHandler
@@ -66,7 +76,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void stopFlying(PlayerMoveEvent event) {
         Player p = event.getPlayer();
-        PlayerManager pm = FishSlap.getPlayerManager();
+        PlayerManager pm = FSApi.getPlayerManager();
 
         // cancel flying if playing
         if (pm.isPlaying(p) && p.isFlying() && p.getGameMode() != GameMode.CREATIVE) {
@@ -78,43 +88,13 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onFishSlap(EntityDamageByEntityEvent event) {
-        if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
-            Player slapper = (Player) event.getDamager();
-            Player target = (Player) event.getEntity();
-            Fish fish = new Fish(slapper, slapper.getInventory().getItemInMainHand());
-            PlayerManager pm = FishSlap.getPlayerManager();
-
-            if (fish.getType() == Fish.FishType.INVALID || !pm.isPlaying(slapper) || !pm.isPlaying(target))
-                return;
-
-            FishSlapEvent slapEvent = new FishSlapEvent(slapper, target, fish, event);
-            Bukkit.getPluginManager().callEvent(slapEvent);
-
-            fish.addXp(slapEvent.getXp());
-            pm.updateScores(slapEvent);
-        }
     }
 
     @EventHandler
     public void fishChangeByInventoryClick(InventoryClickEvent event) {
-
     }
 
     @EventHandler
     public void fishChangeByHotkey(PlayerSwapHandItemsEvent event) {
-        Player p = event.getPlayer();
-        Fish newFish = new Fish(p, event.getOffHandItem());
-        Fish oldFish = new Fish(p, event.getMainHandItem());
-
-        if (oldFish.isOnCooldown()) {
-            event.setCancelled(true);
-            p.sendMessage("You cannot remove that while it is on cooldown.");
-            return;
-        }
-
-        if (newFish.isValid() || oldFish.isValid()) {
-            ChangeOffhandFishEvent changeOffhandFishEvent = new ChangeOffhandFishEvent(p, oldFish, newFish);
-            Bukkit.getPluginManager().callEvent(changeOffhandFishEvent);
-        }
     }
 }

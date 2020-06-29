@@ -2,3 +2,4 @@ name: FishSlap
 version: 1.16.1
 main: me.stipe.fishslap.FishSlap
 author: cheracc
+api-version: 1.15

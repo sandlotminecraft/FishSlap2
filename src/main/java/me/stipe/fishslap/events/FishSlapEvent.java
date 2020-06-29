@@ -5,7 +5,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.jetbrains.annotations.NotNull;
-import me.stipe.fishslap.fish.Fish;
 
 public class FishSlapEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
@@ -17,14 +16,12 @@ public class FishSlapEvent extends Event {
     private final Player slapper;
     private final Player target;
     private final EntityDamageByEntityEvent event;
-    private final Fish fish;
     private int xp;
 
-    public FishSlapEvent(@NotNull Player slapper, @NotNull Player target, Fish fish, @NotNull EntityDamageByEntityEvent event) {
+    public FishSlapEvent(@NotNull Player slapper, @NotNull Player target, @NotNull EntityDamageByEntityEvent event) {
         this.slapper = slapper;
         this.target = target;
         this.event = event;
-        this.fish = fish;
         this.xp = 0;
     }
 
@@ -38,10 +35,6 @@ public class FishSlapEvent extends Event {
 
     public EntityDamageByEntityEvent getEvent() {
         return event;
-    }
-
-    public Fish getFish() {
-        return fish;
     }
 
     public int getXp() {
