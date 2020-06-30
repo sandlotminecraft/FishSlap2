@@ -19,7 +19,4 @@ public class GameTickEvent extends Event {
         return handlers;
     }
 
-    public void doGameTick() {
-
-    }
 }
