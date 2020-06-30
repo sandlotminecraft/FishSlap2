@@ -18,4 +18,8 @@ public class GameTickEvent extends Event {
     public HandlerList getHandlers() {
         return handlers;
     }
+
+    public void doGameTick() {
+
+    }
 }

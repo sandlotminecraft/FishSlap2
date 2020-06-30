@@ -2,6 +2,7 @@ package me.stipe.fishslap;
 
 import me.stipe.fishslap.managers.ConfigManager;
 import me.stipe.fishslap.managers.PlayerManager;
+import org.bukkit.Bukkit;
 
 public class FSApi {
     private static FishSlap fishSlap;
@@ -25,5 +26,7 @@ public class FSApi {
         playerManager = new PlayerManager();
         configManager = new ConfigManager();
         configManager.loadConfigs();
+
+        Bukkit.getPluginManager().registerEvents(playerManager, fishSlap);
     }
 }
