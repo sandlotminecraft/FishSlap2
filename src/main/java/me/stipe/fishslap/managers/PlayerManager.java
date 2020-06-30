@@ -1,9 +1,11 @@
 package me.stipe.fishslap.managers;
 
 import me.stipe.fishslap.FSApi;
+import me.stipe.fishslap.configs.MainConfig;
+import me.stipe.fishslap.configs.Translations;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
-import me.stipe.fishslap.events.FishSlapEvent;
 import me.stipe.fishslap.events.GameTickEvent;
+import me.stipe.fishslap.types.Fish;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -22,44 +24,75 @@ import java.util.*;
 
 public class PlayerManager implements Listener {
 
-    private final ScoreboardManager manager;
     private final Scoreboard scoreboard;
     private final Scoreboard spectatorBoard;
     private final Objective spectatorInfo;
     private final Objective topScores;
-    private final Objective health;
+    private final MainConfig config = FSApi.getConfigManager().getMainConfig();
+    private final Translations translations = FSApi.getConfigManager().getTranslations();
 
     private final List<UUID> playerList = new ArrayList<>();
     private Map<BossBar, Integer> bossBars = new HashMap<>();
 
-    // TODO - put these in config
-    private final String spectatorBossBarTitle = ChatColor.YELLOW + "Joining FishSlap in %s seconds";
-    private final int joinTimer = 10;
 
     public PlayerManager() {
-        manager = Bukkit.getScoreboardManager();
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
         scoreboard = manager.getNewScoreboard();
-        topScores = scoreboard.registerNewObjective("scores", "dummy", ChatColor.translateAlternateColorCodes('&',"&e&lTop Scores&r"));
-        health = scoreboard.registerNewObjective("Health", "health", ChatColor.RED + "\u2665");
+        topScores = scoreboard.registerNewObjective("scores", "dummy", translations.colorize(translations.getTopScoresTitle()));
+        Objective health = scoreboard.registerNewObjective("Health", "health", ChatColor.RED + "\u2665");
 
         topScores.setDisplaySlot(DisplaySlot.SIDEBAR);
         health.setDisplaySlot(DisplaySlot.BELOW_NAME);
 
         spectatorBoard = manager.getNewScoreboard();
-        spectatorInfo = spectatorBoard.registerNewObjective("info", "dummy", ChatColor.GOLD + "" + ChatColor.BOLD + "Come Play FishSlap!");
-        spectatorInfo.setDisplaySlot(DisplaySlot.SIDEBAR);
-        spectatorInfo.getScore("").setScore(5);
-        spectatorInfo.getScore("There is currently nobody playing").setScore(4);
-        spectatorInfo.getScore("Current Top Score: 0").setScore(3);
-        spectatorInfo.getScore(" ").setScore(2);
-        spectatorInfo.getScore(ChatColor.LIGHT_PURPLE + " Catch a fish and hold it in").setScore(1);
-        spectatorInfo.getScore(ChatColor.LIGHT_PURPLE + " your off hand to play!").setScore(0);
+        spectatorInfo = spectatorBoard.registerNewObjective("info", "dummy", translations.colorize(translations.getSpectatorBoardTitle()));
+        initializeSpectatorInfo();
     }
 
     // manage scores
     public void addScore(Player p, int rawAmount) {
         Score score = topScores.getScore(ChatColor.stripColor(p.getDisplayName()));
         score.setScore(score.getScore() + rawAmount);
+    }
+
+    private int getTopScore() {
+        int topScore = 0;
+        for (String s : scoreboard.getEntries()) {
+            if (topScores.getScore(s).getScore() > topScore)
+                topScore = topScores.getScore(s).getScore();
+        }
+        return topScore;
+    }
+
+    private void initializeSpectatorInfo() {
+        int line = 9;
+        spectatorInfo.setDisplaySlot(DisplaySlot.SIDEBAR);
+        spectatorInfo.getScore("").setScore(line);
+        line--;
+        spectatorInfo.getScore(translations.colorize(String.format(translations.getSpectatorBoardPlayers(), playerList.size()))).setScore(line);
+        line--;
+        spectatorInfo.getScore(translations.colorize(String.format(translations.getSpectatorBoardTopScore(), getTopScore()))).setScore(line);
+        line--;
+        for (String s : translations.getSpectatorBoardInfoText()) {
+            spectatorInfo.getScore(translations.colorize(s)).setScore(line);
+            line--;
+        }
+    }
+
+    private void updateSpectatorInfo() {
+        for (String s : spectatorBoard.getEntries()) {
+            if (s.contains("Players")) {
+                int line = spectatorInfo.getScore(s).getScore();
+                spectatorBoard.resetScores(s);
+                spectatorInfo.getScore(translations.colorize(String.format(translations.getSpectatorBoardPlayers(), playerList.size()))).setScore(line);
+            }
+            if (s.contains("Top Score")) {
+                int line = spectatorInfo.getScore(s).getScore();
+                spectatorBoard.resetScores(s);
+                spectatorInfo.getScore(translations.colorize(String.format(translations.getSpectatorBoardTopScore(), getTopScore()))).setScore(line);
+            }
+
+        }
     }
 
     public void sendSpectatorScoreboard(Player p) {
@@ -71,17 +104,24 @@ public class PlayerManager implements Listener {
         playerList.add(p.getUniqueId());
         p.setScoreboard(scoreboard);
         addScore(p, 0);
-        p.sendMessage("Joined");
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isPlaying(player))
+                player.sendMessage(translations.colorize(String.format(translations.getPlayerJoinedGameMessage(), p.getName())));
+        }
+
+        if (!config.isEnabledEquipEffectsIfNotPlaying()) {
+            Fish fish = Fish.getFromItemStack(p.getInventory().getItemInOffHand(), p);
+            if (fish != null)
+                fish.addEquipEffects();
+        }
+
+
     }
 
     public void removePlayer(Player p) {
         playerList.remove(p.getUniqueId());
         p.setScoreboard(spectatorBoard);
         p.sendMessage("Left");
-    }
-
-    public void updateScores(FishSlapEvent event) {
-
     }
 
     public boolean isPlaying(Player p) {
@@ -94,20 +134,22 @@ public class PlayerManager implements Listener {
 
     private void startJoin(Player p) {
         NamespacedKey key = new NamespacedKey(FSApi.getPlugin(), p.getUniqueId().toString());
-        String title = String.format(spectatorBossBarTitle, joinTimer);
+        String title = String.format(translations.colorize(translations.getSpectatorBossBarTitle()), config.getJoinTimer());
 
-        p.setMetadata("joining", new FixedMetadataValue(FSApi.getPlugin(), System.currentTimeMillis() + (1000 * joinTimer)));
-        p.sendMessage("Joining");
+        p.setMetadata("joining", new FixedMetadataValue(FSApi.getPlugin(), System.currentTimeMillis() + (1000 * config.getJoinTimer())));
 
         KeyedBossBar joinBar = Bukkit.getServer().createBossBar(key, title, BarColor.RED, BarStyle.SOLID);
         joinBar.setProgress(1.0);
         joinBar.addPlayer(p);
-        bossBars.put(joinBar, joinTimer);
+        bossBars.put(joinBar, config.getJoinTimer());
+
+        p.sendTitle(translations.colorize(String.format(translations.getPlayerJoiningTitleMessage(), config.getJoinTimer())),
+                translations.colorize(translations.getPlayerJoiningSubtitleMessage()), 5, 70, 5);
     }
 
     private void cancelJoin(Player p) {
         p.removeMetadata("joining", FSApi.getPlugin());
-        p.sendMessage("Join cancelled");
+        p.sendTitle(translations.colorize(translations.getPlayerJoinCancelledTitle()), " ", 5, 30, 5);
 
         for (BossBar bar : bossBars.keySet()) {
             for (Player player : bar.getPlayers()) {
@@ -119,24 +161,20 @@ public class PlayerManager implements Listener {
     }
 
     public void setEngaged(Player p) {
-        // TODO - put this in config
-        int engagementTimer = 30;
-
-        p.setMetadata("engaged", new FixedMetadataValue(FSApi.getPlugin(), System.currentTimeMillis() + (1000 * engagementTimer)));
+        p.setMetadata("engaged", new FixedMetadataValue(FSApi.getPlugin(), System.currentTimeMillis() + (1000 * config.getEngagementTimer())));
     }
 
     public boolean isEngaged(Player p) {
         return p.hasMetadata("engaged");
     }
 
-    @EventHandler
-    public void onGameTick(GameTickEvent event) {
+    private void tickBossBars() {
         Map <BossBar, Integer> newMap = new HashMap<>();
         for (BossBar bar : bossBars.keySet()) {
             int left = bossBars.get(bar) - 1;
 
-            bar.setTitle(String.format(spectatorBossBarTitle, left));
-            bar.setProgress((float) left / joinTimer);
+            bar.setTitle(String.format(translations.colorize(translations.getSpectatorBossBarTitle()), left));
+            bar.setProgress((float) left / config.getJoinTimer());
 
             if (left > 0)
                 newMap.put(bar, left);
@@ -153,6 +191,13 @@ public class PlayerManager implements Listener {
             }
         }
         bossBars = newMap;
+
+    }
+
+    @EventHandler
+    public void onGameTick(GameTickEvent event) {
+        updateSpectatorInfo();
+        tickBossBars();
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (isEngaged(p)) {

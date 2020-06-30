@@ -23,9 +23,9 @@ public class FSApi {
 
     public static void initialize(FishSlap pluginInstance) {
         fishSlap = pluginInstance;
-        playerManager = new PlayerManager();
         configManager = new ConfigManager();
         configManager.loadConfigs();
+        playerManager = new PlayerManager();
 
         Bukkit.getPluginManager().registerEvents(playerManager, fishSlap);
     }

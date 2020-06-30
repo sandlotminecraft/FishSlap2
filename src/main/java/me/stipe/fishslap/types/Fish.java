@@ -245,9 +245,13 @@ public class Fish implements Listener {
 
     @EventHandler
     public void onChangeFish(ChangeOffhandFishEvent event) {
+
         if (event.getOldFish() != null)
             event.getOldFish().removeEquipEffects();
-        if (event.getNewFish() != null)
+        if (event.getNewFish() != null) {
+            if (!FSApi.getConfigManager().getMainConfig().isEnabledEquipEffectsIfNotPlaying() && !FSApi.getPlayerManager().isPlaying(event.getPlayer()))
+                return;
             event.getNewFish().addEquipEffects();
+        }
     }
 }
