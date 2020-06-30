@@ -2,6 +2,7 @@ package me.stipe.fishslap.types;
 
 import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
+import me.stipe.fishslap.managers.ConfigManager;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -55,13 +56,23 @@ public class Fish implements Listener {
 
     public FishMeta getFishMeta() {
         if (fishMeta == null) {
+            ConfigManager cm = FSApi.getConfigManager();
             switch (material) {
                 case COD:
-                    fishMeta = FSApi.getConfigManager().getCodConfig().getLevelData(level);
-                    displayName = FSApi.getConfigManager().getCodConfig().getDisplayName();
+                    fishMeta = cm.getCodConfig().getLevelData(level);
+                    displayName = cm.getCodConfig().getDisplayName();
                     break;
                 case SALMON:
-                    fishMeta = null;
+                    fishMeta = cm.getSalmonConfig().getLevelData(level);
+                    displayName = cm.getSalmonConfig().getDisplayName();
+                    break;
+                case TROPICAL_FISH:
+                    fishMeta = cm.getTropicalFishConfig().getLevelData(level);
+                    displayName = cm.getTropicalFishConfig().getDisplayName();
+                    break;
+                case PUFFERFISH:
+                    fishMeta = cm.getPufferfishConfig().getLevelData(level);
+                    displayName = cm.getPufferfishConfig().getDisplayName();
                     break;
                 default:
                     return null;

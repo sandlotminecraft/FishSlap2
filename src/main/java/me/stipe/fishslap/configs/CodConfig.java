@@ -5,14 +5,14 @@ import me.stipe.fishslap.types.FishMeta;
 
 public class CodConfig extends FishConfig {
 
-    private double[] defaultDamage = {1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
-    private double[] defaultArmor = {1,2,3,4,5,6,7,8,9,10};
-    private double[] defaultAttackSpeed = {1,1.2,1.4,1.6,1.8,2,2.2,2.4,2.6,2.8};
-    private double[] defaultToughness = {0,1,2,3,4,5,6,7,8,9};
-    private double[] defaultKnockbackResist = {0,10,20,30,40,50,60,70,80,90};
-    private double[] defaultLuckBonus = {0,5,10,15,20,25,30,35,40,45};
-    private double[] defaultHealthBonus = {0,2,4,6,8,10,12,14,16,18};
-    private double[] defaultSpeedBonus = {0,1,2,3,4,5,8,10,15,20};
+    private final double[] defaultDamage = {1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
+    private final double[] defaultArmor = {1,2,3,4,5,6,7,8,9,10};
+    private final double[] defaultAttackSpeed = {1,1.2,1.4,1.6,1.8,2,2.2,2.4,2.6,2.8};
+    private final double[] defaultToughness = {0,1,2,3,4,5,6,7,8,9};
+    private final double[] defaultKnockbackResist = {0,10,20,30,40,50,60,70,80,90};
+    private final double[] defaultLuckBonus = {0,5,10,15,20,25,30,35,40,45};
+    private final double[] defaultHealthBonus = {0,2,4,6,8,10,12,14,16,18};
+    private final double[] defaultSpeedBonus = {0,1,2,3,4,5,8,10,15,20};
 
     private String[][] defaultEnchants = new String[][]{
             new String[]{"knockback 1"},

@@ -29,18 +29,35 @@ public class PlayerListener implements Listener {
 
         Player p = event.getPlayer();
 
-        for (ItemStack item : p.getInventory().getContents())
-            if (item != null && item.getType() == Material.COD)
-                p.getInventory().removeItem(item);
+        /* debug */
+        {
+            for (ItemStack item : p.getInventory().getContents()) {
+                if (item != null && (item.getType() == Material.COD || item.getType() == Material.TROPICAL_FISH || item.getType() == Material.SALMON || item.getType() == Material.PUFFERFISH))
+                    p.getInventory().removeItem(item);
+            }
 
-        for (ItemStack item : p.getInventory().getArmorContents())
-            if (item != null && item.getType() == Material.COD)
-                p.getInventory().removeItem(item);
+            for (ItemStack item : p.getInventory().getArmorContents()) {
+                if (item != null && (item.getType() == Material.COD || item.getType() == Material.TROPICAL_FISH || item.getType() == Material.SALMON || item.getType() == Material.PUFFERFISH))
+                    p.getInventory().removeItem(item);
+            }
 
+            ItemStack offhand = p.getInventory().getItemInOffHand();
+            if (offhand != null && (offhand.getType() == Material.COD || offhand.getType() == Material.TROPICAL_FISH || offhand.getType() == Material.SALMON || offhand.getType() == Material.PUFFERFISH))
+                p.getInventory().removeItem(offhand);
 
-        p.getInventory().addItem(new Fish(Material.COD, 1, 25, p).generateItem());
-        p.getInventory().addItem(new Fish(Material.COD, 5, 256, p).generateItem());
-        p.getInventory().addItem(new Fish(Material.COD, 10, 1502, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.COD, 1, 25, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.COD, 5, 256, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.COD, 10, 1502, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.SALMON, 1, 25, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.SALMON, 5, 256, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.SALMON, 10, 1502, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.TROPICAL_FISH, 1, 25, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.TROPICAL_FISH, 5, 256, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.TROPICAL_FISH, 10, 1502, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.PUFFERFISH, 1, 25, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.PUFFERFISH, 5, 256, p).generateItem());
+            p.getInventory().addItem(new Fish(Material.PUFFERFISH, 10, 1502, p).generateItem());
+        }
 
     }
 
