@@ -19,7 +19,13 @@ public class Poison extends CustomEnchantment implements Listener {
     public static Enchantment POISON = new Poison();
 
     public Poison() {
-        super("Poison", 1, 6);
+        super("poison", 1, 6);
+    }
+
+    @NotNull
+    @Override
+    public String getName() {
+        return "Stinging Poison";
     }
 
     @Override
