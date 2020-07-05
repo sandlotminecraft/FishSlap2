@@ -141,7 +141,7 @@ public class FishMeta {
 
             if (type == null)
                 continue;
-            PotionEffect potionEffect = new PotionEffect(type, useEffectDuration, amplifier, false, false);
+            PotionEffect potionEffect = new PotionEffect(type, useEffectDuration * 20, amplifier, false, false);
             effects.add(potionEffect);
         }
         return effects;

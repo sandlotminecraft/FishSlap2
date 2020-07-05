@@ -4,15 +4,14 @@ import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.managers.ConfigManager;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -117,6 +116,18 @@ public class Fish implements Listener {
         for (PotionEffect e : fishMeta.getEquipEffects()) {
             owner.removePotionEffect(e.getType());
         }
+    }
+
+    private boolean hasCooldown() {
+        return owner.hasCooldown(material);
+    }
+
+    private void doUseEffect() {
+        for (PotionEffect e : fishMeta.getUseEffects())
+            e.apply(owner);
+        owner.setCooldown(material, fishMeta.getUseEffectCooldown() * 20);
+        owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_EVOKER_CAST_SPELL, 1F, 1F);
+        owner.getWorld().spawnParticle(Particle.TOTEM, owner.getEyeLocation(), 100, 0.5, 1, 0.5);
     }
 
     private List<String> generateLore() {
@@ -264,5 +275,17 @@ public class Fish implements Listener {
                 return;
             event.getNewFish().addEquipEffects();
         }
+    }
+
+    @EventHandler
+    public void onUseFish(PlayerInteractEvent event) {
+        Fish fish = Fish.getFromItemStack(event.getPlayer().getInventory().getItemInMainHand(), event.getPlayer());
+
+        if (fish == null || !event.getAction().name().toLowerCase().contains("right"))
+            return;
+
+        if (!fish.hasCooldown())
+            fish.doUseEffect();
+
     }
 }
