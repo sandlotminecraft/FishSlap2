@@ -50,6 +50,18 @@ public class TropicalFishConfig extends FishConfig {
             new String[]{"absorption 2"},
             new String[]{"absorption 3"},
     };
+    private String[][] defaultAbilities = new String[][]{
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+    };
     private int[] defaultUseEffectDuration = {12,16,20,30,40,40,50,50,60,60};
     private int[] defaultUseEffectCooldown = {30,30,30,60,60,60,45,45,30,30};
     private int[] defaultXp = {100,150,200,300,400,500,600,800,1000,2000};
@@ -61,7 +73,7 @@ public class TropicalFishConfig extends FishConfig {
         for (int i = 0; i < defaultDamage.length; i++) {
             fishStats.put(i + 1, new FishMeta(defaultDamage[i], defaultArmor[i], defaultAttackSpeed[i], defaultToughness[i],
                     defaultKnockbackResist[i]/100, defaultLuckBonus[i], defaultHealthBonus[i], defaultSpeedBonus[i]/100, defaultEnchants[i],
-                    defaultEquipEffects[i], defaultUseEffects[i], defaultUseEffectDuration[i], defaultUseEffectCooldown[i], defaultXp[i]));
+                    defaultEquipEffects[i], defaultUseEffects[i], defaultAbilities[i], defaultUseEffectDuration[i], defaultUseEffectCooldown[i], defaultXp[i]));
         }
     }
 }

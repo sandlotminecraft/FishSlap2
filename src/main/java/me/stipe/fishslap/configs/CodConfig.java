@@ -50,6 +50,18 @@ public class CodConfig extends FishConfig {
             new String[]{"absorption 1"},
             new String[]{"absorption 2"},
     };
+    private String[][] defaultAbilities = new String[][]{
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+    };
     private int[] defaultUseEffectDuration = {0,0,0,8,10,12,12,12,12,12};
     private int[] defaultUseEffectCooldown = {0,0,0,60,60,60,60,55,50,45};
     private int[] defaultXp = {100,150,200,300,400,500,600,800,1000,2000};
@@ -63,7 +75,7 @@ public class CodConfig extends FishConfig {
         for (int i = 0; i < defaultDamage.length; i++) {
             fishStats.put(i + 1, new FishMeta(defaultDamage[i], defaultArmor[i], defaultAttackSpeed[i], defaultToughness[i],
                     defaultKnockbackResist[i]/100, defaultLuckBonus[i], defaultHealthBonus[i], defaultSpeedBonus[i]/100, defaultEnchants[i],
-                    defaultEquipEffects[i], defaultUseEffects[i], defaultUseEffectDuration[i], defaultUseEffectCooldown[i], defaultXp[i]));
+                    defaultEquipEffects[i], defaultUseEffects[i], defaultAbilities[i], defaultUseEffectDuration[i], defaultUseEffectCooldown[i], defaultXp[i]));
         }
     }
 

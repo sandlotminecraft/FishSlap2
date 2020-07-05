@@ -1,7 +1,6 @@
 package me.stipe.fishslap.listeners;
 
 import me.stipe.fishslap.FSApi;
-import me.stipe.fishslap.abilities.Cod;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.events.FishSlapEvent;
 import me.stipe.fishslap.managers.PlayerManager;

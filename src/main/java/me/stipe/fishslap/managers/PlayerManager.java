@@ -6,6 +6,7 @@ import me.stipe.fishslap.configs.Translations;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.events.GameTickEvent;
 import me.stipe.fishslap.types.Fish;
+import me.stipe.fishslap.types.FishAbility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -32,6 +33,7 @@ public class PlayerManager implements Listener {
     private final Translations translations = FSApi.getConfigManager().getTranslations();
 
     private final List<UUID> playerList = new ArrayList<>();
+    private final Set<FishAbility> abilities = new HashSet<>();
     private Map<BossBar, Integer> bossBars = new HashMap<>();
 
 
@@ -77,6 +79,34 @@ public class PlayerManager implements Listener {
             spectatorInfo.getScore(translations.colorize(s)).setScore(line);
             line--;
         }
+    }
+
+    public Set<FishAbility> getAbilities() {
+        return abilities;
+    }
+
+    public void registerAbility(FishAbility ability) {
+        abilities.add(ability);
+    }
+
+    public void unregisterAbility(FishAbility ability) {
+        abilities.remove(ability);
+    }
+
+    public boolean isRegistered(FishAbility ability) {
+        for (FishAbility fishAbility : abilities) {
+            if (fishAbility.getName().equals(ability.getName()))
+                return true;
+        }
+        return false;
+    }
+
+    public FishAbility getAbility(String name) {
+        for (FishAbility ability : abilities) {
+            if (ability.getName().equals(name))
+                return ability;
+        }
+        return null;
     }
 
     private void updateSpectatorInfo() {

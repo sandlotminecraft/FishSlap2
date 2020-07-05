@@ -50,6 +50,18 @@ public class SalmonConfig extends FishConfig {
             new String[]{"increase_damage 2"},
             new String[]{"increase_damage 3"},
     };
+    private String[][] defaultAbilities = new String[][]{
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+            new String[]{},
+    };
     private int[] defaultUseEffectDuration = {5,6,7,8,9,10,10,12,12,12};
     private int[] defaultUseEffectCooldown = {45,45,40,40,35,35,30,30,25,25};
     private int[] defaultXp = {100,150,200,300,400,500,600,800,1000,2000};
@@ -61,7 +73,7 @@ public class SalmonConfig extends FishConfig {
         for (int i = 0; i < defaultDamage.length; i++) {
             fishStats.put(i + 1, new FishMeta(defaultDamage[i], defaultArmor[i], defaultAttackSpeed[i], defaultToughness[i],
                     defaultKnockbackResist[i]/100, defaultLuckBonus[i], defaultHealthBonus[i], defaultSpeedBonus[i]/100, defaultEnchants[i],
-                    defaultEquipEffects[i], defaultUseEffects[i], defaultUseEffectDuration[i], defaultUseEffectCooldown[i], defaultXp[i]));
+                    defaultEquipEffects[i], defaultUseEffects[i], defaultAbilities[i], defaultUseEffectDuration[i], defaultUseEffectCooldown[i], defaultXp[i]));
         }
     }
 }

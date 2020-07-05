@@ -1,6 +1,8 @@
 package me.stipe.fishslap.types;
 
+import com.google.common.reflect.ClassPath;
 import me.stipe.fishslap.FSApi;
+import me.stipe.fishslap.abilities.RemovePoison;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.managers.ConfigManager;
 import org.apache.commons.lang.StringUtils;
@@ -21,20 +23,18 @@ import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Fish implements Listener {
-    protected NamespacedKey levelKey = new NamespacedKey(FSApi.getPlugin(), "level");
-    protected NamespacedKey xpKey = new NamespacedKey(FSApi.getPlugin(), "xp");
-    protected Material material;
-    protected List<String> extraLore = new ArrayList<>();
-    protected Player owner;
-    protected FishMeta fishMeta;
-    protected String displayName;
-    protected int level;
-    protected int xp;
+    private NamespacedKey levelKey = new NamespacedKey(FSApi.getPlugin(), "level");
+    private NamespacedKey xpKey = new NamespacedKey(FSApi.getPlugin(), "xp");
+    private Material material;
+    private Player owner;
+    private FishMeta fishMeta;
+    private String displayName;
+    private int level;
+    private int xp;
+    private Color effectColor;
 
     public Fish() {
         material = null;
@@ -43,6 +43,7 @@ public class Fish implements Listener {
         fishMeta = null;
         displayName = "";
         xp = 0;
+        effectColor = Color.WHITE;
     }
 
     public Fish(Material type, int level, int xp, Player owner) {
@@ -60,18 +61,22 @@ public class Fish implements Listener {
                 case COD:
                     fishMeta = cm.getCodConfig().getLevelData(level);
                     displayName = cm.getCodConfig().getDisplayName();
+                    effectColor = Color.BLUE;
                     break;
                 case SALMON:
                     fishMeta = cm.getSalmonConfig().getLevelData(level);
                     displayName = cm.getSalmonConfig().getDisplayName();
+                    effectColor = Color.FUCHSIA;
                     break;
                 case TROPICAL_FISH:
                     fishMeta = cm.getTropicalFishConfig().getLevelData(level);
                     displayName = cm.getTropicalFishConfig().getDisplayName();
+                    effectColor = Color.ORANGE;
                     break;
                 case PUFFERFISH:
                     fishMeta = cm.getPufferfishConfig().getLevelData(level);
                     displayName = cm.getPufferfishConfig().getDisplayName();
+                    effectColor = Color.YELLOW;
                     break;
                 default:
                     return null;
@@ -123,11 +128,19 @@ public class Fish implements Listener {
     }
 
     private void doUseEffect() {
+        if (fishMeta.getUseEffectCooldown() == 0 && fishMeta.getUseEffects().isEmpty())
+            return;
+
         for (PotionEffect e : fishMeta.getUseEffects())
             e.apply(owner);
         owner.setCooldown(material, fishMeta.getUseEffectCooldown() * 20);
-        owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_EVOKER_CAST_SPELL, 1F, 1F);
-        owner.getWorld().spawnParticle(Particle.TOTEM, owner.getEyeLocation(), 100, 0.5, 1, 0.5);
+        for (int i = 0; i < 200; i++) {
+            owner.getWorld().spawnParticle(Particle.SPELL_MOB, owner.getLocation().add(0,(float) i / 100,0),
+                    0, (float) effectColor.getRed()/255, (float) effectColor.getGreen()/255, (float) effectColor.getBlue()/255, 1);
+        }
+        owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_EVOKER_CAST_SPELL, 1F, 1.2F);
+        for (FishAbility ability : fishMeta.getAbilities())
+            ability.doRightClickEffect(owner);
     }
 
     private List<String> generateLore() {
@@ -180,12 +193,16 @@ public class Fish implements Listener {
         if (!fishMeta.getUseEffects().isEmpty()) {
             lore.add(" ");
             for (PotionEffect e : fishMeta.getUseEffects()) {
-                lore.add(String.format(effectDuration, toReadable(e.getType().getName()), integerToRomanNumeral(e.getAmplifier() + 1), e.getDuration()));
+                lore.add(String.format(effectDuration, toReadable(e.getType().getName()), integerToRomanNumeral(e.getAmplifier() + 1), e.getDuration() / 20));
                 lore.add(String.format(cooldown, fishMeta.getUseEffectCooldown()));
             }
         }
 
-        lore.addAll(extraLore);
+        for (FishAbility ability : fishMeta.getAbilities()) {
+            if (!ability.getAbilityLore(0).isEmpty())
+                lore.add(" ");
+            lore.addAll(ability.getAbilityLore(fishMeta.getUseEffectCooldown()));
+        }
         return lore;
     }
 
@@ -247,22 +264,12 @@ public class Fish implements Listener {
     }
 
     public static String integerToRomanNumeral(int input) {
-        if (input < 1 || input > 3999)
-            return "Invalid Roman Number Value";
-        StringBuilder s = new StringBuilder();
-        while (input >= 5) {
-            s.append("V");
-            input -= 5;
-        }
-        while (input >= 4) {
-            s.append("IV");
-            input -= 4;
-        }
-        while (input >= 1) {
-            s.append("I");
-            input -= 1;
-        }
-        return s.toString();
+        String[] numerals = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV"};
+
+        if (input > 15)
+            return "";
+
+        return numerals[input];
     }
 
     @EventHandler
@@ -284,7 +291,7 @@ public class Fish implements Listener {
         if (fish == null || !event.getAction().name().toLowerCase().contains("right"))
             return;
 
-        if (!fish.hasCooldown())
+// debug        if (!fish.hasCooldown())
             fish.doUseEffect();
 
     }

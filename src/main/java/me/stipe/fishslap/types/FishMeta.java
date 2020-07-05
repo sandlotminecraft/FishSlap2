@@ -20,13 +20,14 @@ public class FishMeta {
     private final List<String> enchantmentStrings;
     private final List<String> equipEffectStrings;
     private final List<String> useEffectStrings;
+    private final List<String> fishAbilities;
     private final int useEffectDuration;
     private final int useEffectCooldown;
     private final int xp;
 
 
     public FishMeta(double damage, double armor, double attackSpeed, double toughness, double knockbackResist, double luckBonus, double healthBonus,
-                    double speedBonus, String[] enchantmentStrings, String[] equipEffectStrings, String[] useEffectStrings, int useEffectDuration,
+                    double speedBonus, String[] enchantmentStrings, String[] equipEffectStrings, String[] useEffectStrings, String[] fishAbilities, int useEffectDuration,
                     int useEffectCooldown, int xp) {
         this.damage = damage;
         this.armor = armor;
@@ -42,6 +43,7 @@ public class FishMeta {
         this.useEffectDuration = useEffectDuration;
         this.useEffectCooldown = useEffectCooldown;
         this.xp = xp;
+        this.fishAbilities = Arrays.asList(fishAbilities);
     }
 
     public FishMeta(ConfigurationSection configData) {
@@ -59,6 +61,7 @@ public class FishMeta {
         useEffectDuration = configData.getInt("useEffectDuration");
         useEffectCooldown = configData.getInt("useEffectCooldown");
         xp = configData.getInt("xp");
+        fishAbilities = configData.getStringList("abilities");
     }
 
     public void createConfigSection(ConfigurationSection levelData) {
@@ -76,6 +79,7 @@ public class FishMeta {
         levelData.set("useEffectDuration", useEffectDuration);
         levelData.set("useEffectCooldown", useEffectCooldown);
         levelData.set("xp", xp);
+        levelData.set("abilities", fishAbilities);
     }
 
     public double getAttackSpeed() {
@@ -145,6 +149,23 @@ public class FishMeta {
             effects.add(potionEffect);
         }
         return effects;
+    }
+
+    public Set<FishAbility> getAbilities() {
+        Set<FishAbility> abilities = new HashSet<>();
+
+        for (String s : fishAbilities) {
+            Class<?> abilityClass;
+            try {
+                abilityClass = Class.forName("me.stipe.fishslap.abilities." + s);
+                abilities.add((FishAbility) abilityClass.newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                System.out.println("[FishSlap] ERROR: Could not load ability: " + s);
+            }
+        }
+
+
+        return abilities;
     }
 
     public double getAttackSpeedModifier() {
