@@ -20,12 +20,14 @@ public class FishSlapEvent extends Event implements Cancellable {
     private int xp;
     private Fish fish;
     private boolean cancelled;
+    private EntityDamageByEntityEvent event;
 
-    public FishSlapEvent(@NotNull Player slapper, @NotNull Player target, @NotNull Fish fish) {
+    public FishSlapEvent(@NotNull Player slapper, @NotNull Player target, @NotNull Fish fish, @NotNull EntityDamageByEntityEvent event) {
         this.slapper = slapper;
         this.target = target;
         this.fish = fish;
         this.xp = 0;
+        this.event = event;
     }
 
     public Player getSlapper() {
@@ -38,6 +40,10 @@ public class FishSlapEvent extends Event implements Cancellable {
 
     public Fish getFish() {
         return fish;
+    }
+
+    public EntityDamageByEntityEvent getDamageEvent() {
+        return event;
     }
 
     public int getXp() {

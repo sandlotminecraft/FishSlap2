@@ -1,5 +1,6 @@
 package me.stipe.fishslap;
 
+import me.stipe.fishslap.enchants.HealingTouch;
 import me.stipe.fishslap.enchants.Poison;
 import me.stipe.fishslap.events.GameTickEvent;
 import me.stipe.fishslap.listeners.FishingHandler;
@@ -22,6 +23,7 @@ public class FishSlap extends JavaPlugin {
         Bukkit.getServer().getPluginManager().registerEvents(new FishingHandler(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new Fish(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new Poison(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new HealingTouch(), this);
 
         try {
             Field f = Enchantment.class.getDeclaredField("acceptingNew");
@@ -30,7 +32,9 @@ public class FishSlap extends JavaPlugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // TODO load all enchantments in the package automatically and register their listeners
         Enchantment.registerEnchantment(new Poison());
+        Enchantment.registerEnchantment(new HealingTouch());
         Enchantment.stopAcceptingRegistrations();
 
         new BukkitRunnable() {

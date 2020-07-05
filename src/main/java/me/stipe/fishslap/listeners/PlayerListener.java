@@ -127,7 +127,7 @@ public class PlayerListener implements Listener {
             if (fish == null || !pm.isPlaying(slapper) || !pm.isPlaying(target))
                 return;
 
-            FishSlapEvent fishSlapEvent = new FishSlapEvent(slapper, target, fish);
+            FishSlapEvent fishSlapEvent = new FishSlapEvent(slapper, target, fish, event);
             Bukkit.getPluginManager().callEvent(fishSlapEvent);
 
             if (fishSlapEvent.isCancelled())

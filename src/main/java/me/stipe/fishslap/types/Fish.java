@@ -3,6 +3,7 @@ package me.stipe.fishslap.types;
 import com.google.common.reflect.ClassPath;
 import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.abilities.RemovePoison;
+import me.stipe.fishslap.enchants.HealingTouch;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.managers.ConfigManager;
 import org.apache.commons.lang.StringUtils;
@@ -148,6 +149,7 @@ public class Fish implements Listener {
 
         String itemLevel = ChatColor.GOLD + "Item Level %d (%.1f%%)";
         String damageSpeed = ChatColor.WHITE + "%.1f Damage                        Speed %.1f";
+        String healingDamageSpeed = ChatColor.GREEN + "Heals %.1f Damage" + ChatColor.WHITE + "                        Speed %.1f";
         String dps = ChatColor.WHITE + "(%.1f damage per second)";
         String armor = ChatColor.WHITE + " +%.0f Armor";
         String whenHeldInOffHand = ChatColor.DARK_AQUA + "When Held in Off Hand:";
@@ -164,7 +166,10 @@ public class Fish implements Listener {
         }
 
         lore.add(String.format(itemLevel, level, ((float) xp / fishMeta.getXp()) * 100));
-        lore.add(String.format(damageSpeed, fishMeta.getDamage(), fishMeta.getAttackSpeed()));
+        if (fishMeta.getEnchantments().containsKey(HealingTouch.HEALING_TOUCH))
+            lore.add(String.format(healingDamageSpeed, fishMeta.getDamage(), fishMeta.getAttackSpeed()));
+        else
+            lore.add(String.format(damageSpeed, fishMeta.getDamage(), fishMeta.getAttackSpeed()));
         lore.add(String.format(dps, fishMeta.getDamage() * fishMeta.getAttackSpeed()));
 
         if (fishMeta.getArmor() > 0)

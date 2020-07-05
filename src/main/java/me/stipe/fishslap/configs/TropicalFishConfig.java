@@ -15,16 +15,16 @@ public class TropicalFishConfig extends FishConfig {
     private final double[] defaultSpeedBonus = {0,0,0,0,0,0,0,0,0,0};
 
     private String[][] defaultEnchants = new String[][]{
-            new String[]{},
-            new String[]{},
-            new String[]{},
-            new String[]{},
-            new String[]{},
-            new String[]{},
-            new String[]{},
-            new String[]{},
-            new String[]{},
-            new String[]{},
+            new String[]{"healing_touch 1"},
+            new String[]{"healing_touch 1"},
+            new String[]{"healing_touch 1"},
+            new String[]{"healing_touch 1"},
+            new String[]{"healing_touch 1"},
+            new String[]{"healing_touch 1"},
+            new String[]{"healing_touch 1"},
+            new String[]{"healing_touch 1"},
+            new String[]{"healing_touch 1"},
+            new String[]{"healing_touch 1"},
     };
     private String[][] defaultEquipEffects = new String[][]{
             new String[]{},
