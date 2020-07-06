@@ -1,31 +1,27 @@
 package me.stipe.fishslap.listeners;
 
 import me.stipe.fishslap.FSApi;
+import me.stipe.fishslap.configs.Translations;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.events.FishSlapEvent;
 import me.stipe.fishslap.managers.PlayerManager;
 import me.stipe.fishslap.types.Fish;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 public class PlayerListener implements Listener {
 
@@ -147,17 +143,31 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void cancelEatingFish(PlayerItemConsumeEvent event) {
-
+        if (Fish.isSpecialFish(event.getItem(), event.getPlayer()))
+            event.setCancelled(true);
     }
 
     @EventHandler
     public void noDropFish(PlayerDropItemEvent event) {
-
+        if (Fish.isSpecialFish(event.getItemDrop().getItemStack(), event.getPlayer()))
+            event.setCancelled(true);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        if (Fish.isSpecialFish(event.getPlayer().getInventory().getItemInOffHand(), event.getPlayer())) {
+            Player player = event.getPlayer();
+            ItemStack fishItem = player.getInventory().getItemInOffHand();
 
+            if (player.getInventory().firstEmpty() >= 0) {
+                player.getInventory().setItemInOffHand(null);
+                player.getInventory().addItem(fishItem);
+                ChangeOffhandFishEvent changeEvent = new ChangeOffhandFishEvent(player, Fish.getFromItemStack(fishItem, player), null);
+                changeEvent.callEvent();
+            }
+
+
+        }
     }
 
     @EventHandler
@@ -172,11 +182,6 @@ public class PlayerListener implements Listener {
     public void cancelFallDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player && event.getCause() == EntityDamageEvent.DamageCause.FALL)
             event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onRespawn(PlayerRespawnEvent event) {
-
     }
 
     @EventHandler
@@ -196,21 +201,50 @@ public class PlayerListener implements Listener {
     public void onFishSlap(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
             Player slapper = (Player) event.getDamager();
+            Fish fish = Fish.getFromItemStack(slapper.getInventory().getItemInMainHand(), slapper);
 
-            if (!Fish.isSpecialFish(slapper.getInventory().getItemInMainHand(), slapper))
+            if (fish == null)
                 return;
 
-            Fish fish = Fish.getFromItemStack(slapper.getInventory().getItemInMainHand(), slapper);
             Player target = (Player) event.getEntity();
             PlayerManager pm = FSApi.getPlayerManager();
+            Translations translations = FSApi.getConfigManager().getTranslations();
 
-            if (fish == null || !pm.isPlaying(slapper) || !pm.isPlaying(target))
+            if (!pm.isPlaying(slapper)) {
+                event.setCancelled(true);
+                slapper.sendMessage(ChatColor.translateAlternateColorCodes('&', translations.getMessagePlayerNotPlaying()));
                 return;
+            }
+
+            if (!pm.isPlaying(target)) {
+                event.setCancelled(true);
+                slapper.sendMessage(String.format(ChatColor.translateAlternateColorCodes('&', translations.getMessageTargetNotPlaying()), target.getName()));
+                return;
+            }
 
             FishSlapEvent fishSlapEvent = new FishSlapEvent(slapper, target, fish, event);
-            Bukkit.getPluginManager().callEvent(fishSlapEvent);
+            if (!fishSlapEvent.callEvent())
+                event.setCancelled(true);
+        }
+    }
 
-            if (fishSlapEvent.isCancelled())
+    @EventHandler
+    public void fishChangeByInventoryDrag(InventoryDragEvent event) {
+        if (event.getInventorySlots().contains(40) || !(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
+
+        if (event.getCursor() == null)
+            return;
+
+        Player p = (Player) event.getWhoClicked();
+
+        Fish newFish = Fish.getFromItemStack(event.getCursor(), p);
+
+        if (newFish != null) {
+            ChangeOffhandFishEvent changeOffhandFishEvent = new ChangeOffhandFishEvent(p, null, newFish);
+
+            if (!changeOffhandFishEvent.callEvent())
                 event.setCancelled(true);
         }
     }

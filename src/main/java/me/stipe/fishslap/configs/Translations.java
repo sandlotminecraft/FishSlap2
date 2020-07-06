@@ -13,10 +13,12 @@ public class Translations {
     private final String topScoresTitle = "&e&lTop Scores&r";
     private final String spectatorBoardPlayers = "&e\u25B6 &bCurrent Players: &e%s";
     private final String spectatorBoardTopScore = "&e\u25B6 &bCurrent Top Score: &e%s";
-    private final String playerJoinedGameMessage = "&e[&6FishSlap&e] %s has joined the game.";
-    private final String playerJoiningTitleMessage = "&bJoining FishSlap in %s Seconds...";
-    private final String playerJoiningSubtitleMessage = "&eRemove Your Offhand Fish to Cancel";
-    private final String playerJoinCancelledTitle = "&cJoin Cancelled!";
+    private final String messagePlayerJoinedGame = "&e[&6FishSlap&e] %s has joined the game.";
+    private final String titlePlayerJoiningTitle = "&bJoining FishSlap in %s Seconds...";
+    private final String titlePlayerJoiningSubtitle = "&eRemove Your Offhand Fish to Cancel";
+    private final String titlePlayerJoinCancelled = "&cJoin Cancelled!";
+    private final String messagePlayerNotPlaying = "&e[&6FishSlap&e] You must join the game before doing that";
+    private final String messageTargetNotPlaying = "&e[&6FishSlap&e] %s is not currently playing";
     private final List<String> spectatorBoardInfoText = new ArrayList<>();
 
     public Translations() {

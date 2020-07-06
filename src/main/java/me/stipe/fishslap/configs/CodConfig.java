@@ -27,7 +27,7 @@ public class CodConfig extends FishConfig {
             new String[]{"knockback 3", "poison 2"},
     };
     private String[][] defaultEquipEffects = new String[][]{
-            new String[]{"damage_resistance 0"},
+            new String[]{"speed 0", "haste 0", "strength 0", "jump_boost 0", "regeneration 0", "damage_resistance 1", "fire_resistance 0", "water_breathing 0", "invisibility 0", "night_vision 0", "absorption 10", "luck 0", "slow_falling 0", "conduit_power 0", "dolphins_grace 0", "hero_of_the_village 0"},
             new String[]{"damage_resistance 0"},
             new String[]{"damage_resistance 1"},
             new String[]{"damage_resistance 1"},
@@ -89,6 +89,13 @@ public class CodConfig extends FishConfig {
     public void save() {
         config.set("Test Entry", testEntry);
         super.save();
+    }
+
+    @Override
+    protected String commentBlock() {
+        String comment = super.commentBlock();
+
+        return comment;
     }
 
 }

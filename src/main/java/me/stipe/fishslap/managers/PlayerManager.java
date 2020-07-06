@@ -10,6 +10,7 @@ import me.stipe.fishslap.types.FishAbility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -19,6 +20,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 
 import java.util.*;
@@ -136,7 +138,7 @@ public class PlayerManager implements Listener {
         addScore(p, 0);
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (isPlaying(player))
-                player.sendMessage(translations.colorize(String.format(translations.getPlayerJoinedGameMessage(), p.getName())));
+                player.sendMessage(translations.colorize(String.format(translations.getMessagePlayerJoinedGame(), p.getName())));
         }
 
         if (!config.isEnabledEquipEffectsIfNotPlaying()) {
@@ -173,13 +175,13 @@ public class PlayerManager implements Listener {
         joinBar.addPlayer(p);
         bossBars.put(joinBar, config.getJoinTimer());
 
-        p.sendTitle(translations.colorize(String.format(translations.getPlayerJoiningTitleMessage(), config.getJoinTimer())),
-                translations.colorize(translations.getPlayerJoiningSubtitleMessage()), 5, 70, 5);
+        p.sendTitle(translations.colorize(String.format(translations.getTitlePlayerJoiningTitle(), config.getJoinTimer())),
+                translations.colorize(translations.getTitlePlayerJoiningSubtitle()), 5, 70, 5);
     }
 
     private void cancelJoin(Player p) {
         p.removeMetadata("joining", FSApi.getPlugin());
-        p.sendTitle(translations.colorize(translations.getPlayerJoinCancelledTitle()), " ", 5, 30, 5);
+        p.sendTitle(translations.colorize(translations.getTitlePlayerJoinCancelled()), " ", 5, 30, 5);
 
         for (BossBar bar : bossBars.keySet()) {
             for (Player player : bar.getPlayers()) {
@@ -208,11 +210,24 @@ public class PlayerManager implements Listener {
 
             if (left > 0)
                 newMap.put(bar, left);
+
             for (Player p : bar.getPlayers()) {
+                if (left <= 3 && left > 0) {
+                    p.sendTitle(ChatColor.translateAlternateColorCodes('&', "&eJoining in:&l ") + left, "", 5, 10, 5);
+                    p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASEDRUM, 1F, 1F);
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASEDRUM, 1F, 3F);
+                        }
+                    }.runTaskLater(FSApi.getPlugin(), 5);
+                }
                 if (left == 0) {
                     addPlayer(p);
                     bar.removePlayer(p);
                     p.removeMetadata("joining", FSApi.getPlugin());
+                    p.sendTitle(ChatColor.translateAlternateColorCodes('&', "&a&lGame On!"), "", 5, 10, 5);
+                    p.playSound(p.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 1F, 1.5F);
                 }
                 if (!p.isOnline()) {
                     newMap.remove(bar);
