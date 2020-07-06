@@ -7,7 +7,7 @@ public class TropicalFishConfig extends FishConfig {
 
     private final double[] defaultDamage = {1,1,2,2,3,3,4,4,5,5};
     private final double[] defaultArmor = {0,0,2,2,2,4,4,4,6,6};
-    private final double[] defaultAttackSpeed = {2,2,2,2,2,2,2,2,2,2};
+    private final double[] defaultAttackSpeed = {0.5,0.5,0.5,0.5,0.5,0.75,0.75,0.75,1,1};
     private final double[] defaultToughness = {0,0,0,0,0,0,0,0,0,0};
     private final double[] defaultKnockbackResist = {0,5,10,15,20,25,30,35,40,45};
     private final double[] defaultLuckBonus = {0,0,0,0,0,0,0,0,0,0};

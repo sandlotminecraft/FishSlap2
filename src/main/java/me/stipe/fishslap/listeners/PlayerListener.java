@@ -5,9 +5,10 @@ import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.events.FishSlapEvent;
 import me.stipe.fishslap.managers.PlayerManager;
 import me.stipe.fishslap.types.Fish;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,6 +19,13 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 public class PlayerListener implements Listener {
 
@@ -61,8 +69,80 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event) {
+    public void onPlayerDeath(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
+            Player damager = (Player) event.getDamager();
+            Player target = (Player) event.getEntity();
+            if (target.isInvulnerable()) {
+                event.setCancelled(true);
+                return;
+            }
 
+            if (target.getHealth() - event.getFinalDamage() <= 0) {
+                event.setCancelled(true);
+                target.setHealth(target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+                target.setInvulnerable(true);
+
+                Vector launchVector = damager.getLocation().getDirection().add(new Vector(0,6,0)).normalize().multiply(5);
+                new BukkitRunnable() {
+                    int count = 0;
+                    long last = System.currentTimeMillis();
+                    @Override
+                    public void run() {
+                        if (System.currentTimeMillis() < last)
+                            return;
+                        if (count < 2) {
+                            target.playSound(target.getLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1.5F);
+                            count++;
+                            last = System.currentTimeMillis() + 500;
+                            return;
+                        }
+                        if (count < 7) {
+                            target.playSound(target.getLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1.5F);
+                            count++;
+                            last = System.currentTimeMillis() + 300;
+                            return;
+                        }
+                        if (count < 12) {
+                            target.playSound(target.getLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1.5F);
+                            count++;
+                            last = System.currentTimeMillis() + 100;
+                            return;
+                        }
+                        if (count < 18) {
+                            target.playSound(target.getLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1.5F);
+                            count++;
+                            last = System.currentTimeMillis() + 50;
+                            return;
+                        }
+                        count++;
+
+                        if (count > 25) {
+
+                            // TODO teleport player above if they are under a tree, etc.
+
+                            target.setVelocity(new Vector(0, 6, 0));
+                            target.getWorld().spawnParticle(Particle.SLIME, target.getLocation().add(0, 0.25, 0), 200, 0.7, 0.5, 0.7);
+                            target.getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, target.getLocation(), 50, 0.5, 0.25, 0.5);
+                            target.playSound(target.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1F, 1F);
+                            target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 400, 0));
+                            target.removePotionEffect(PotionEffectType.LEVITATION);
+
+                            cancel();
+                        }
+                    }
+                }.runTaskTimer(FSApi.getPlugin(), 0, 1);
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        target.setInvulnerable(false);
+                    }
+                }.runTaskLater(FSApi.getPlugin(), 200);
+
+                target.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 200, 0));
+            }
+        }
     }
 
     @EventHandler
