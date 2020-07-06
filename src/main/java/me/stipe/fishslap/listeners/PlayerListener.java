@@ -8,20 +8,24 @@ import me.stipe.fishslap.managers.PlayerManager;
 import me.stipe.fishslap.types.Fish;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerListener implements Listener {
 
@@ -31,6 +35,14 @@ public class PlayerListener implements Listener {
         FSApi.getPlayerManager().sendSpectatorScoreboard(event.getPlayer());
 
         Player p = event.getPlayer();
+
+        if (Fish.isSpecialFish(p.getInventory().getItemInOffHand(), p) && p.getInventory().firstEmpty() >= 0) {
+            ItemStack fish = p.getInventory().getItemInOffHand();
+            p.getInventory().setItemInOffHand(null);
+            p.getInventory().addItem(fish);
+            ChangeOffhandFishEvent changeEvent = new ChangeOffhandFishEvent(p, Fish.getFromItemStack(fish, p), null);
+            changeEvent.callEvent();
+        }
 
         /* debug */
         {
@@ -45,7 +57,7 @@ public class PlayerListener implements Listener {
             }
 
             ItemStack offhand = p.getInventory().getItemInOffHand();
-            if (offhand != null && (offhand.getType() == Material.COD || offhand.getType() == Material.TROPICAL_FISH || offhand.getType() == Material.SALMON || offhand.getType() == Material.PUFFERFISH))
+            if (offhand.getType() == Material.COD || offhand.getType() == Material.TROPICAL_FISH || offhand.getType() == Material.SALMON || offhand.getType() == Material.PUFFERFISH)
                 p.getInventory().removeItem(offhand);
 
             p.getInventory().addItem(new Fish(Material.COD, 1, 25, p).generateItem());
@@ -61,8 +73,90 @@ public class PlayerListener implements Listener {
             p.getInventory().addItem(new Fish(Material.PUFFERFISH, 5, 256, p).generateItem());
             p.getInventory().addItem(new Fish(Material.PUFFERFISH, 10, 1502, p).generateItem());
         }
-
     }
+
+    @EventHandler
+    public void updateXpBar(PlayerItemHeldEvent event) {
+        Player p = event.getPlayer();
+        ItemStack fishItem = p.getInventory().getItem(event.getNewSlot());
+
+        if (fishItem != null) {
+            Fish fish = Fish.getFromItemStack(fishItem, p);
+            if (fish != null) {
+                p.setLevel(fish.getLevel());
+                p.setExp((float) fish.getXp() / fish.getFishMeta().getXp());
+            }
+        }
+        else {
+            p.setLevel(0);
+            p.setExp(0F);
+        }
+    }
+
+    @EventHandler
+    public void onAoeCloud(AreaEffectCloudApplyEvent event) {
+        ProjectileSource source = event.getEntity().getSource();
+        PlayerManager pm = FSApi.getPlayerManager();
+
+        if (!(source instanceof Player))
+            return;
+
+        Player p = (Player) source;
+
+        if (!pm.isPlaying(p)) {
+            List<LivingEntity> toRemove = new ArrayList<>();
+            for (LivingEntity entity : event.getAffectedEntities()) {
+                if (entity instanceof Player)
+                    toRemove.add(entity);
+            }
+            event.getAffectedEntities().removeAll(toRemove);
+        } else {
+            List<LivingEntity> toRemove = new ArrayList<>();
+            for (LivingEntity entity : event.getAffectedEntities()) {
+                if (entity instanceof Player && !pm.isPlaying((Player) entity)) {
+                    toRemove.add(entity);
+                }
+            }
+            event.getAffectedEntities().removeAll(toRemove);
+        }
+    }
+
+    @EventHandler //try to prevent splash potions affecting non-players
+    public void onPotionSplash(PotionSplashEvent event) {
+        ThrownPotion potion = event.getPotion();
+        ProjectileSource source = potion.getShooter();
+        PlayerManager pm = FSApi.getPlayerManager();
+
+        if (!(source instanceof Player)) {
+            return;
+        }
+        Player p = (Player) source;
+
+        if (!pm.isPlaying(p)) {
+            for (LivingEntity entity : event.getAffectedEntities()) {
+                if (entity instanceof Player) {
+                    event.setIntensity(entity, 0);
+                    event.getAffectedEntities().remove(entity);
+                }
+            }
+        } else {
+            for (LivingEntity entity : event.getAffectedEntities()) {
+                if (entity instanceof Player && !pm.isPlaying((Player) entity)) {
+                    event.setIntensity(entity, 0);
+                    event.getAffectedEntities().remove(entity);
+                }
+            }
+        }
+    }
+
+    // prevent all health regeneration other than from this plugin
+    @EventHandler
+    public void onHealthRegen(EntityRegainHealthEvent event) {
+        if (event.getEntity() instanceof Player)
+            if (event.getRegainReason() == EntityRegainHealthEvent.RegainReason.REGEN || event.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED)
+                event.setCancelled(true);
+    }
+
 
     @EventHandler
     public void onPlayerDeath(EntityDamageByEntityEvent event) {
@@ -79,7 +173,6 @@ public class PlayerListener implements Listener {
                 target.setHealth(target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
                 target.setInvulnerable(true);
 
-                Vector launchVector = damager.getLocation().getDirection().add(new Vector(0,6,0)).normalize().multiply(5);
                 new BukkitRunnable() {
                     int count = 0;
                     long last = System.currentTimeMillis();

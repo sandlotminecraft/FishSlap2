@@ -260,6 +260,14 @@ public class Fish implements Listener {
         return fish;
     }
 
+    public int getLevel() {
+        return level;
+    }
+
+    public int getXp() {
+        return xp;
+    }
+
     private String toReadable(String string) {
         String[] names = string.split("_");
         for (int i = 0; i < names.length; i++) {
