@@ -1,24 +1,26 @@
 package me.stipe.fishslap.managers;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.configs.MainConfig;
 import me.stipe.fishslap.configs.Translations;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
+import me.stipe.fishslap.events.FishSlapEvent;
 import me.stipe.fishslap.events.GameTickEvent;
 import me.stipe.fishslap.types.Fish;
 import me.stipe.fishslap.types.FishAbility;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
@@ -37,7 +39,96 @@ public class PlayerManager implements Listener {
     private final List<UUID> playerList = new ArrayList<>();
     private final Set<FishAbility> abilities = new HashSet<>();
     private Map<BossBar, Integer> bossBars = new HashMap<>();
+    private Map<String, PlayerData> playerData =  new HashMap<>();
 
+    @Getter
+    private class PlayerData {
+        private String name;
+        private List<String> killers;
+        private Map<String, Double> recentDamagers;
+        private int kills;
+        private int deaths;
+        private double damageDone;
+        private int healingDone;
+        @Setter
+        private boolean dead;
+
+        public PlayerData(Player player) {
+            this(player.getName());
+        }
+
+        public PlayerData(String name) {
+            this.name = name;
+            killers = new ArrayList<>();
+            recentDamagers = new HashMap<>();
+            kills = 0;
+            deaths = 0;
+            damageDone = 0;
+            healingDone = 0;
+            dead = false;
+        }
+
+        public void addKill() {
+            kills++;
+        }
+
+        public void addDamageDone(double damage) {
+            if (damage >= 0)
+                damageDone += damage;
+            else
+                healingDone -= damage;
+        }
+
+        public void addDamager(String name, double damage) {
+            if (recentDamagers.containsKey(name))
+                recentDamagers.replace(name, recentDamagers.get(name) + damage);
+            else
+                recentDamagers.put(name, damage);
+        }
+
+        public void addDeath(String killer) {
+            deaths++;
+            recentDamagers = new HashMap<>();
+
+            if (killer != null)
+                killers.add(killer);
+        }
+
+        private Fish getBestFish() {
+            Player p = Bukkit.getPlayer(name);
+
+            if (p == null)
+                return null;
+
+            Fish fish = Fish.getFromItemStack(p.getInventory().getItemInOffHand(), p);
+            Fish bestFish = null;
+
+            if (fish != null)
+                bestFish = fish;
+
+            for (ItemStack item : p.getInventory().getContents()) {
+                if (item == null) continue;
+                fish = Fish.getFromItemStack(item, p);
+                if (fish == null) continue;
+
+                if (bestFish == null) {
+                    bestFish = fish;
+                    continue;
+                }
+
+                if (fish.getLevel() > bestFish.getLevel()) {
+                    bestFish = fish;
+                    continue;
+                }
+
+                if (fish.getLevel() == bestFish.getLevel())
+                    if (fish.getXp() > bestFish.getXp())
+                        bestFish = fish;
+
+            }
+            return bestFish;
+        }
+    }
 
     public PlayerManager() {
         ScoreboardManager manager = Bukkit.getScoreboardManager();
@@ -53,10 +144,27 @@ public class PlayerManager implements Listener {
         initializeSpectatorInfo();
     }
 
+    public boolean isDead(Player player) {
+        if (player.isDead())
+            return true;
+
+        if (playerData.containsKey(player.getName()))
+            return playerData.get(player.getName()).isDead();
+
+        return false;
+    }
+
+    public void setDead(Player player, boolean dead) {
+        if (!playerData.containsKey(player.getName()))
+            playerData.put(player.getName(), new PlayerData(player));
+
+        playerData.get(player.getName()).setDead(dead);
+    }
+
     // manage scores
     public void addScore(Player p, int rawAmount) {
         Score score = topScores.getScore(ChatColor.stripColor(p.getDisplayName()));
-        score.setScore(score.getScore() + rawAmount);
+        score.setScore(Math.max(0, score.getScore() + rawAmount));
     }
 
     private int getTopScore() {
@@ -255,6 +363,77 @@ public class PlayerManager implements Listener {
         }
     }
 
+    @EventHandler (priority = EventPriority.LOW)
+    public void onFishSlap(FishSlapEvent event) {
+        if (event.isCancelled() || event.getDamageEvent().isCancelled())
+            return;
+
+        Player target = event.getTarget();
+        Player slapper = event.getSlapper();
+        double damage = Math.min(event.getDamageEvent().getFinalDamage(), target.getHealth());
+        Translations translations = FSApi.getConfigManager().getTranslations();
+        MainConfig config = FSApi.getConfigManager().getMainConfig();
+
+        slapper.setGameMode(GameMode.SURVIVAL);
+
+        if (isDead(target) || !isPlaying(target) || !isPlaying(slapper))
+            return;
+
+        if (!playerData.containsKey(slapper.getName()))
+            playerData.put(slapper.getName(), new PlayerData(slapper));
+        if (!playerData.containsKey(target.getName()))
+            playerData.put(target.getName(), new PlayerData(target));
+
+        playerData.get(target.getName()).addDamager(slapper.getName(), damage);
+        playerData.get(slapper.getName()).addDamageDone(damage);
+
+        // this is a killing blow so log those stats and grant points
+        if (target.getHealth() == damage) {
+            int pointsPerKill = config.getPointsPerKill();
+            playerData.get(slapper.getName()).addKill();
+            addScore(target, -config.getPointsLostPerDeath());
+            target.sendActionBar('&', String.format(translations.getActionBarPlayerDied(), config.getPointsLostPerDeath()));
+
+            double totalDamage = 0;
+            for (Double d : playerData.get(target.getName()).getRecentDamagers().values()) {
+                totalDamage += d;
+            }
+
+            int totalKillerCount = playerData.get(target.getName()).getKillers().size();
+
+            for (String s : playerData.get(target.getName()).getRecentDamagers().keySet()) {
+                Player p = Bukkit.getPlayer(s);
+                int damageDone = (int) Math.round(playerData.get(target.getName()).getRecentDamagers().get(s));
+                int killPoints = (int) Math.round(pointsPerKill * (playerData.get(target.getName()).getRecentDamagers().get(s) / totalDamage));
+                int killsOnThisPlayer = Collections.frequency(playerData.get(target.getName()).getKillers(), s);
+                int kbBonus = config.getKillingBlowBonus();
+                float multiplier = 1;
+                if (p == null) continue;
+
+                if (killsOnThisPlayer > 3) {
+                    multiplier = 1 - Math.max(0, (float) (killsOnThisPlayer - 3) / totalKillerCount);
+                    if (topScores.getScore(target.getName()).getScore() <= 0) {
+                        p.sendActionBar('&', String.format(translations.getActionBarPlayerKilledNoPoints(), target.getName()));
+                        continue;
+                    }
+                }
+
+                kbBonus *= multiplier;
+                killPoints *= multiplier;
+                if (!s.equals(slapper.getName())) {
+                    p.sendActionBar('&', String.format(translations.getActionBarPlayerKilledPointsAward(), target.getName(), killPoints, damageDone / totalDamage * 100));
+                    addScore(p, killPoints);
+                }
+                else {
+                    slapper.sendActionBar('&', String.format(translations.getActionBarPlayerKillingBlow(), target.getName(), kbBonus + killPoints, damageDone / totalDamage * 100, kbBonus));
+                    addScore(slapper, kbBonus + killPoints);
+                }
+            }
+            playerData.get(target.getName()).addDeath(slapper.getName());
+
+        }
+    }
+
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player p = event.getPlayer();
@@ -270,6 +449,7 @@ public class PlayerManager implements Listener {
         if (!isPlaying(p)) {
             // not playing and swapped a fish into off hand (wasn't one there already)
             if (event.getNewFish() != null && event.getOldFish() == null) {
+
                 startJoin(p);
             }
 

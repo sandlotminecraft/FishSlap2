@@ -7,7 +7,6 @@ import me.stipe.fishslap.events.FishSlapEvent;
 import me.stipe.fishslap.managers.PlayerManager;
 import me.stipe.fishslap.types.Fish;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ThrownPotion;
@@ -161,17 +160,21 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerDeath(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
-            Player damager = (Player) event.getDamager();
             Player target = (Player) event.getEntity();
-            if (target.isInvulnerable()) {
+            if (FSApi.getPlayerManager().isDead(target)) {
                 event.setCancelled(true);
                 return;
             }
 
             if (target.getHealth() - event.getFinalDamage() <= 0) {
                 event.setCancelled(true);
-                target.setHealth(target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+                target.setHealth(0.1);
                 target.setInvulnerable(true);
+                FSApi.getPlayerManager().setDead(target, true);
+                target.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 160, 3));
+                target.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 200, 0));
+                target.playEffect(EntityEffect.TOTEM_RESURRECT);
+                target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_DEATH, 1F, 1F);
 
                 new BukkitRunnable() {
                     int count = 0;
@@ -226,12 +229,40 @@ public class PlayerListener implements Listener {
                     @Override
                     public void run() {
                         target.setInvulnerable(false);
+                        FSApi.getPlayerManager().setDead(target, false);
                     }
                 }.runTaskLater(FSApi.getPlugin(), 200);
 
-                target.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 200, 0));
             }
         }
+    }
+
+    @EventHandler
+    public void stopDeadDamage(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player) {
+            if (FSApi.getPlayerManager().isDead((Player) event.getDamager()))
+                event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void stopDeadDamage(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Player) {
+            if (FSApi.getPlayerManager().isDead((Player) event.getEntity()))
+                event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void stopDeadInteract(PlayerInteractEvent event) {
+        if (FSApi.getPlayerManager().isDead(event.getPlayer()))
+            event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void stopDead(PlayerInteractAtEntityEvent event) {
+        if (FSApi.getPlayerManager().isDead(event.getPlayer()))
+            event.setCancelled(true);
     }
 
     @EventHandler

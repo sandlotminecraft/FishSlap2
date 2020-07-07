@@ -10,7 +10,7 @@ import java.util.List;
 public class Translations {
     private final String spectatorBossBarTitle = "&eJoining FishSlap in %s seconds";
     private final String spectatorBoardTitle = "&6&lCome Play FishSlap!";
-    private final String topScoresTitle = "&e&lTop Scores&r";
+    private final String topScoresTitle = "&e&lFishSlap Top Scores&r";
     private final String spectatorBoardPlayers = "&e\u25B6 &bCurrent Players: &e%s";
     private final String spectatorBoardTopScore = "&e\u25B6 &bCurrent Top Score: &e%s";
     private final String messagePlayerJoinedGame = "&e[&6FishSlap&e] %s has joined the game.";
@@ -19,6 +19,10 @@ public class Translations {
     private final String titlePlayerJoinCancelled = "&cJoin Cancelled!";
     private final String messagePlayerNotPlaying = "&e[&6FishSlap&e] You must join the game before doing that";
     private final String messageTargetNotPlaying = "&e[&6FishSlap&e] %s is not currently playing";
+    private final String actionBarPlayerKilledPointsAward = "&d%s died. You earn &b%s &dpoints (%.0f%% of damage done)";
+    private final String actionBarPlayerKillingBlow = "&dYou killed %s. You earn &b%s &dpoints (%.0f%% damage, %s kb bonus)";
+    private final String actionBarPlayerKilledNoPoints = "&d%s died. You earned no points due to diminishing returns";
+    private final String actionBarPlayerDied = "&dYou died. You lost &b%s &dpoints";
     private final List<String> spectatorBoardInfoText = new ArrayList<>();
 
     public Translations() {
