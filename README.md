@@ -1,11 +1,11 @@
-#FishSlap - a fun lobby game
+# FishSlap - a fun lobby game
 FishSlap is a quirky and fun PvP game intended to bring life to your server network's lobby server.
-##How to Play FishSlap
+## How to Play FishSlap
 1. Go Fishing
 2. Catch a fish
 3. Hold it in your off hand
 4. Get Slap-Happy!
-##Features
+## Features
 - FishSlap is opt-in: You must hold and keep a fish in your off hand to play. Configurable warmups and cooldowns prevent sniping and griefing behaviors
 - Level up your fish by slapping others around - higher level fish earn better stats and abilities
 - Fish are fully configurable: customize their damage, attack speed, "on-equip" effects, "on-use" effects, cooldowns, durations, etc.
@@ -14,10 +14,10 @@ FishSlap is a quirky and fun PvP game intended to bring life to your server netw
 - Custom Achievements: dozens of custom FishSlap advancements
 - Statistics: save statistics via MySQL and view them using an intuitive GUI
 - Built-In Economy: You can use the built-in economy or use your own vault-enabled system
-##Configuring FishSlap
+## Configuring FishSlap
 There are several FishSlap configuration files:
-##FishSlap Commands
-##Get FishSlap
+## FishSlap Commands
+## Get FishSlap
 FishSlap is currently in an ALPHA phase. You WILL find bugs and partially-implemented systems. You can get the latest version here:
 
 [Latest FishSlap .jar](http://home.stipe.me/job/FishSlap/lastSuccessfulBuild/artifact/target/FishSlap2-1.16.1.jar)
