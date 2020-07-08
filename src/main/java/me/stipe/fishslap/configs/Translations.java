@@ -1,6 +1,7 @@
 package me.stipe.fishslap.configs;
 
 import lombok.Getter;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class Translations {
     private final String actionBarPlayerKillingBlow = "&dYou killed %s. You earn &b%s &dpoints (%.0f%% damage, %s kb bonus)";
     private final String actionBarPlayerKilledNoPoints = "&d%s died. You earned no points due to diminishing returns";
     private final String actionBarPlayerDied = "&dYou died. You lost &b%s &dpoints";
+    private final String actionBarPowerupCooldown = "&e[&6Powerup&e]: %s - %d:%02d remaining";
     private final List<String> spectatorBoardInfoText = new ArrayList<>();
 
     public Translations() {
@@ -40,5 +42,23 @@ public class Translations {
         spectatorBoardInfoText.add("   ");
         spectatorBoardInfoText.add(colorize("     &e&lwww.sandlotminecraft.com"));
     }
+
+    public String toReadable(String string) {
+        String[] names = string.split("_");
+        for (int i = 0; i < names.length; i++) {
+            names[i] = names[i].substring(0, 1).toUpperCase() + names[i].substring(1).toLowerCase();
+        }
+        return StringUtils.join(names, " ");
+    }
+
+    public String integerToRomanNumeral(int input) {
+        String[] numerals = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV"};
+
+        if (input > 15)
+            return "";
+
+        return numerals[input];
+    }
+
 
 }

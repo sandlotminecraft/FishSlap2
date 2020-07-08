@@ -1,0 +1,68 @@
+#=========================================================
+#  powerups.yml
+#
+#=========================================================
+prismarine_shard:
+  name: spiked_collar
+  display name: '&fA Tiny Spiked Collar'
+  duration: 180
+  chance: 30
+  enchantments:
+    - thorns 1
+  equip effects:
+  attribute bonuses:
+quartz:
+  name: sharp_things
+  display name: '&fSome Sharp Things and Some Duct Tape'
+  duration: 180
+  chance: 30
+  enchantments:
+  equip effects:
+  attribute bonuses:
+    - attack_damage 1
+turtle_helmet:
+  name: little_helmet
+  display name: '&fA Little Fish Sized Helmet Made From Chewed Gum'
+  duration: 180
+  chance: 30
+  enchantments:
+  equip effects:
+  attribute bonuses:
+    - armor 1
+dragon_breath:
+  name: growth_hormone
+  display name: '&fSome Questionable Growth Hormones'
+  duration: 180
+  chance: 30
+  enchantments:
+  equip effects:
+  attribute bonuses:
+    - max_health 2
+stick:
+  name: spiked_collar
+  display name: '&fA Stick'
+  duration: 180
+  chance: 30
+  enchantments:
+    - sweeping 1
+  equip effects:
+  attribute bonuses:
+conduit:
+  name: rock_of_truth
+  display name: '&eThe Rock of 1000 Truths'
+  duration: 180
+  chance: 10
+  enchantments:
+    - sweeping 3
+    - unbreaking 3
+    - sharpness 3
+    - fire_aspect 3
+  equip effects:
+    - regeneration
+    - bad_omen
+    - fire_resistance
+  attribute bonuses:
+    - luck 20
+    - armor 10
+    - movement_speed 20
+

@@ -3,7 +3,9 @@ package me.stipe.fishslap.listeners;
 import lombok.Getter;
 import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.managers.PlayerManager;
+import me.stipe.fishslap.managers.PowerupManager;
 import me.stipe.fishslap.types.Fish;
+import me.stipe.fishslap.types.Powerup;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -16,7 +18,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import java.util.ArrayList;
@@ -29,15 +30,16 @@ public class FishingHandler implements Listener {
     List<FishingLoot> loot = new ArrayList<>();
     private String[] lootTable = new String[] {
             "50 diamond true",
-            "50 iron_ingot false",
-            "10 wooden_sword false",
-            "10 iron_sword true",
-            "25 potion false regen amplified",
-            "40 stone_sword false sweeping_edge 4"
+//            "50 iron_ingot false",
+//            "10 wooden_sword false",
+//            "10 iron_sword true",
+//            "25 potion false regen amplified",
+//            "40 stone_sword false sweeping_edge 4"
     };
 
     public FishingHandler() {
-        populateLootFromConfig();
+        //populateLootFromConfig();
+        addPowerupsToLoot();
     }
 
     @Getter
@@ -57,6 +59,7 @@ public class FishingHandler implements Listener {
     private ItemStack getFishingLoot(boolean playing) {
         ItemStack item = new ItemStack(Material.STICK);
 
+
         for (int i = 0; i < 50; i++) {
             Collections.shuffle(loot);
             for (FishingLoot entry : loot) {
@@ -69,6 +72,14 @@ public class FishingHandler implements Listener {
         }
 
         return item;
+    }
+
+    private void addPowerupsToLoot() {
+        PowerupManager powerups = FSApi.getPowerupManager();
+
+        for (Powerup powerup : powerups.getAvailablePowerups().values()) {
+            loot.add(new FishingLoot(powerup.createItem(), 50, true));
+        }
     }
 
     private void populateLootFromConfig() {

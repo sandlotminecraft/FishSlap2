@@ -1,8 +1,6 @@
 package me.stipe.fishslap.types;
 
-import com.google.common.reflect.ClassPath;
 import me.stipe.fishslap.FSApi;
-import me.stipe.fishslap.abilities.RemovePoison;
 import me.stipe.fishslap.enchants.HealingTouch;
 import me.stipe.fishslap.events.ChangeOffhandFishEvent;
 import me.stipe.fishslap.managers.ConfigManager;
@@ -32,7 +30,9 @@ public class Fish implements Listener {
     private Material material;
     private Player owner;
     private FishMeta fishMeta;
+    private ItemStack fishItem;
     private String displayName;
+    private Powerup powerup;
     private int level;
     private int xp;
     private Color effectColor;
@@ -42,6 +42,8 @@ public class Fish implements Listener {
         owner = null;
         level = 0;
         fishMeta = null;
+        fishItem = null;
+        powerup = null;
         displayName = "";
         xp = 0;
         effectColor = Color.WHITE;
@@ -52,7 +54,69 @@ public class Fish implements Listener {
         this.level = level;
         this.xp = xp;
         this.owner = owner;
+        fishItem = null;
+        powerup = null;
         getFishMeta();
+    }
+
+    public Fish(Material type, int level, int xp, Player owner, ItemStack fishItem) {
+        this(type, level, xp, owner);
+        this.fishItem = fishItem;
+    }
+
+    public Material getType() {
+        return material;
+    }
+
+    public Player getOwner() {
+        return owner;
+    }
+
+    public boolean isEquipped() {
+        if (owner != null && fishItem != null) {
+            Fish held = getFromItemStack(owner.getInventory().getItemInOffHand(), owner);
+
+            return held != null && isSameAs(held);
+        }
+        return false;
+    }
+
+    public boolean isInMainHand() {
+        if (owner != null && fishItem != null) {
+            Fish held = getFromItemStack(owner.getInventory().getItemInMainHand(), owner);
+
+            return held != null && isSameAs(held);
+        }
+        return false;
+    }
+
+    public void updateLore() {
+        if (fishItem == null)
+            return;
+
+        ItemMeta meta = fishItem.getItemMeta();
+        meta.setLore(generateLore());
+        fishItem.setItemMeta(meta);
+    }
+
+    public boolean isSameAs(Fish fish) {
+        return getLevel() == fish.getLevel() && getXp() == fish.getXp() && material == fish.getType();
+    }
+
+    public void attachPowerup(Powerup powerup) {
+        this.powerup = powerup;
+    }
+
+    public void removePowerup() {
+        powerup = null;
+    }
+
+    public boolean hasPowerup() {
+        return powerup != null;
+    }
+
+    public Powerup getPowerup() {
+        return powerup;
     }
 
     public FishMeta getFishMeta() {
@@ -91,7 +155,7 @@ public class Fish implements Listener {
     }
 
     @Nullable
-    public static Fish getFromItemStack(@NotNull ItemStack item, @NotNull Player owner) {
+    public static Fish getFromItemStack(@NotNull ItemStack item, Player owner) {
         NamespacedKey levelKey = new NamespacedKey(FSApi.getPlugin(), "level");
         NamespacedKey xpKey = new NamespacedKey(FSApi.getPlugin(), "xp");
         Material mat = item.getType();
@@ -111,16 +175,24 @@ public class Fish implements Listener {
         }
         else return null;
 
-        return new Fish(mat, level, xp, owner);
+        return new Fish(mat, level, xp, owner, item);
     }
     public void addEquipEffects() {
         for (PotionEffect e : fishMeta.getEquipEffects())
             e.apply(owner);
+        if (powerup != null) {
+            for (PotionEffect e : powerup.getEquipEffects())
+                e.apply(owner);
+        }
     }
 
     public void removeEquipEffects() {
         for (PotionEffect e : fishMeta.getEquipEffects()) {
             owner.removePotionEffect(e.getType());
+        }
+        if (powerup != null) {
+            for (PotionEffect e : powerup.getEquipEffects())
+                owner.removePotionEffect(e.getType());
         }
     }
 
@@ -147,9 +219,9 @@ public class Fish implements Listener {
     private List<String> generateLore() {
         List<String> lore = new ArrayList<>();
 
-        String itemLevel = ChatColor.GOLD + "Item Level %d (%.1f%%)";
+        String itemLevel = ChatColor.GOLD + "Item Level %d";
         String damageSpeed = ChatColor.WHITE + "%.1f Damage                        Speed %.1f";
-        String healingDamageSpeed = ChatColor.GREEN + "Heals %.1f Damage" + ChatColor.WHITE + "                        Speed %.1f";
+        String healingDamageSpeed = ChatColor.GREEN + "Heals %.1f Damage" + ChatColor.WHITE + "                 Speed %.1f";
         String dps = ChatColor.WHITE + "(%.1f damage per second)";
         String armor = ChatColor.WHITE + " +%.0f Armor";
         String whenHeldInOffHand = ChatColor.DARK_AQUA + "When Held in Off Hand:";
@@ -165,7 +237,7 @@ public class Fish implements Listener {
                 lore.add(((CustomEnchantment) ench).getLore(fishMeta.getEnchantments().get(ench)));
         }
 
-        lore.add(String.format(itemLevel, level, ((float) xp / fishMeta.getXp()) * 100));
+        lore.add(String.format(itemLevel, level));
         if (fishMeta.getEnchantments().containsKey(HealingTouch.HEALING_TOUCH))
             lore.add(String.format(healingDamageSpeed, fishMeta.getDamage(), fishMeta.getAttackSpeed()));
         else
@@ -191,6 +263,7 @@ public class Fish implements Listener {
         }
 
         if (!equipEffects.isEmpty()) {
+            lore.add("");
             lore.add(whenHeldInOffHand);
             lore.addAll(equipEffects);
         }
@@ -208,6 +281,10 @@ public class Fish implements Listener {
                 lore.add(" ");
             lore.addAll(ability.getAbilityLore(fishMeta.getUseEffectCooldown()));
         }
+
+        if (powerup != null)
+            lore.addAll(powerup.getAttachedLore());
+
         return lore;
     }
 
@@ -257,14 +334,30 @@ public class Fish implements Listener {
 
         fish.setItemMeta(meta);
 
+        fishItem = fish;
+
         return fish;
     }
 
     public int getLevel() {
+        if (fishItem != null) {
+            if (fishItem.getItemMeta() != null && fishItem.getItemMeta().getPersistentDataContainer().has(levelKey, PersistentDataType.INTEGER)) {
+                Integer l = fishItem.getItemMeta().getPersistentDataContainer().get(levelKey, PersistentDataType.INTEGER);
+                if (l == null)
+                    return 1;
+                level = l;
+            }
+        }
         return level;
     }
 
     public int getXp() {
+        if (fishItem != null) {
+            Integer experience = fishItem.getItemMeta().getPersistentDataContainer().get(xpKey, PersistentDataType.INTEGER);
+            if (experience == null)
+                return 0;
+            xp = experience;
+        }
         return xp;
     }
 
@@ -307,5 +400,9 @@ public class Fish implements Listener {
 // debug        if (!fish.hasCooldown())
             fish.doUseEffect();
 
+    }
+
+    public ItemStack getFishItem() {
+        return fishItem;
     }
 }
