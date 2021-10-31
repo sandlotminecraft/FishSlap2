@@ -158,8 +158,8 @@ public class FishMeta {
             Class<?> abilityClass;
             try {
                 abilityClass = Class.forName("me.stipe.fishslap.abilities." + s);
-                abilities.add((FishAbility) abilityClass.newInstance());
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                abilities.add((FishAbility) abilityClass.getDeclaredConstructor().newInstance());
+            } catch (ReflectiveOperationException e) {
                 System.out.println("[FishSlap] ERROR: Could not load ability: " + s);
             }
         }

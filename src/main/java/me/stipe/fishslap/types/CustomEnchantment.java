@@ -41,7 +41,8 @@ public abstract class CustomEnchantment extends Enchantment {
 
     @NotNull
     public EnchantmentTarget getItemTarget() {
-        return EnchantmentTarget.ALL;
+        //EnchantmentTarget.ALL was deprecated.  Trying any dummy value.
+        return EnchantmentTarget.VANISHABLE;
     }
 
     public boolean isTreasure() {

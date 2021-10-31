@@ -1,7 +1,5 @@
 package me.stipe.fishslap.managers;
 
-import lombok.Getter;
-import lombok.Setter;
 import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.configs.MainConfig;
 import me.stipe.fishslap.configs.Translations;
@@ -20,7 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemStack;
+//import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
@@ -41,16 +39,13 @@ public class PlayerManager implements Listener {
     private Map<BossBar, Integer> bossBars = new HashMap<>();
     private Map<String, PlayerData> playerData =  new HashMap<>();
 
-    @Getter
     private class PlayerData {
         private String name;
         private List<String> killers;
         private Map<String, Double> recentDamagers;
-        private int kills;
         private int deaths;
         private double damageDone;
         private int healingDone;
-        @Setter
         private boolean dead;
 
         public PlayerData(Player player) {
@@ -61,7 +56,6 @@ public class PlayerManager implements Listener {
             this.name = name;
             killers = new ArrayList<>();
             recentDamagers = new HashMap<>();
-            kills = 0;
             deaths = 0;
             damageDone = 0;
             healingDone = 0;
@@ -69,7 +63,6 @@ public class PlayerManager implements Listener {
         }
 
         public void addKill() {
-            kills++;
         }
 
         public void addDamageDone(double damage) {
@@ -94,39 +87,20 @@ public class PlayerManager implements Listener {
                 killers.add(killer);
         }
 
-        private Fish getBestFish() {
-            Player p = Bukkit.getPlayer(name);
+        public boolean isDead() {
+            return dead;
+        }
 
-            if (p == null)
-                return null;
+        public void setDead(boolean dead) {
+            this.dead = dead;
+        }
 
-            Fish fish = Fish.getFromItemStack(p.getInventory().getItemInOffHand(), p);
-            Fish bestFish = null;
+        public List<String> getKillers() {
+            return killers;
+        }
 
-            if (fish != null)
-                bestFish = fish;
-
-            for (ItemStack item : p.getInventory().getContents()) {
-                if (item == null) continue;
-                fish = Fish.getFromItemStack(item, p);
-                if (fish == null) continue;
-
-                if (bestFish == null) {
-                    bestFish = fish;
-                    continue;
-                }
-
-                if (fish.getLevel() > bestFish.getLevel()) {
-                    bestFish = fish;
-                    continue;
-                }
-
-                if (fish.getLevel() == bestFish.getLevel())
-                    if (fish.getXp() > bestFish.getXp())
-                        bestFish = fish;
-
-            }
-            return bestFish;
+        public Map<String, Double> getRecentDamagers() {
+            return recentDamagers;
         }
     }
 

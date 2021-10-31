@@ -186,6 +186,8 @@ public class Fish implements Listener {
         }
     }
 
+    
+
     public void removeEquipEffects() {
         for (PotionEffect e : fishMeta.getEquipEffects()) {
             owner.removePotionEffect(e.getType());

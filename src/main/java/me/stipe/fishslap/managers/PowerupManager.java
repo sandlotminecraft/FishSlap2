@@ -1,6 +1,5 @@
 package me.stipe.fishslap.managers;
 
-import lombok.Getter;
 import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.FishSlap;
 import me.stipe.fishslap.events.GameTickEvent;
@@ -25,7 +24,6 @@ import java.util.Map;
 
 public class PowerupManager implements Listener {
     private final Map<Powerup, Fish> activePowerups;
-    @Getter
     private final Map<NamespacedKey, Powerup> availablePowerups;
 
     public PowerupManager() {
@@ -67,6 +65,14 @@ public class PowerupManager implements Listener {
 
     public void removeActivePowerup(Powerup powerup, Fish fish) {
         activePowerups.remove(powerup, fish);
+    }
+
+    public Map<Powerup, Fish> getActivePowerups() {
+        return activePowerups;
+    }
+
+    public Map<NamespacedKey, Powerup> getAvailablePowerups() {
+        return availablePowerups;
     }
 
     private void load() {

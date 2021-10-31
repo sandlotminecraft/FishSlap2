@@ -1,13 +1,11 @@
 package me.stipe.fishslap.configs;
 
-import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
 public class Translations {
     private final String spectatorBossBarTitle = "&eJoining FishSlap in %s seconds";
     private final String spectatorBoardTitle = "&6&lCome Play FishSlap!";
@@ -60,5 +58,71 @@ public class Translations {
         return numerals[input];
     }
 
+    public String getActionBarPowerupCooldown() {
+        return actionBarPowerupCooldown;
+    }
 
+    public String getTopScoresTitle() {
+        return topScoresTitle;
+    }
+
+    public String getSpectatorBoardTitle() {
+        return spectatorBoardTitle;
+    }
+
+    public List<String> getSpectatorBoardInfoText() {
+        return spectatorBoardInfoText;
+    }
+
+    public String getSpectatorBoardPlayers() {
+        return spectatorBoardPlayers;
+    }
+
+    public String getSpectatorBoardTopScore() {
+        return spectatorBoardTopScore;
+    }
+
+    public String getMessagePlayerJoinedGame() {
+        return messagePlayerJoinedGame;
+    }
+
+    public String getSpectatorBossBarTitle() {
+        return spectatorBossBarTitle;
+    }
+
+    public String getTitlePlayerJoiningSubtitle() {
+        return titlePlayerJoiningSubtitle;
+    }
+
+    public String getMessagePlayerNotPlaying() {
+        return messagePlayerNotPlaying;
+    }
+
+    public String getTitlePlayerJoinCancelled() {
+        return titlePlayerJoinCancelled;
+    }
+
+    public String getMessageTargetNotPlaying() {
+        return messageTargetNotPlaying;
+    }
+
+    public String getTitlePlayerJoiningTitle() {
+        return titlePlayerJoiningTitle;
+    }
+
+    public String getActionBarPlayerDied() {
+        return actionBarPlayerDied;
+    }
+
+    public String getActionBarPlayerKilledNoPoints() {
+        return actionBarPlayerKilledNoPoints;
+    }
+
+    public String getActionBarPlayerKilledPointsAward() {
+        return actionBarPlayerKilledPointsAward;
+    }
+
+    public String getActionBarPlayerKillingBlow() {
+        return actionBarPlayerKillingBlow;
+    }
 }

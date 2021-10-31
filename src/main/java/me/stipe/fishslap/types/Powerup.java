@@ -1,6 +1,5 @@
 package me.stipe.fishslap.types;
 
-import lombok.Getter;
 import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.configs.Translations;
 import org.bukkit.ChatColor;
@@ -21,7 +20,6 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Getter
 public class Powerup {
     private String name;
     private String displayName;
@@ -96,6 +94,8 @@ public class Powerup {
                 case GENERIC_KNOCKBACK_RESISTANCE:
                     lore.add(ChatColor.WHITE + String.format(percent, sign, amount, "Knockback Resistance when held"));
                     break;
+                default:
+                    break;
             }
         }
 
@@ -107,6 +107,10 @@ public class Powerup {
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
+    }
+
+    public List<PotionEffect> getEquipEffects() {
+        return equipEffects;
     }
 
     public List<String> getAttachedLore() {
@@ -149,6 +153,8 @@ public class Powerup {
                     break;
                 case GENERIC_KNOCKBACK_RESISTANCE:
                     lore.add(ChatColor.YELLOW + String.format(percent, sign, amount, "Knockback Resistance when held"));
+                    break;
+                default:
                     break;
             }
         }
@@ -298,5 +304,13 @@ public class Powerup {
         fish.getOwner().sendActionBar('&', String.format(trans.getActionBarPowerupCooldown(),
                 trans.toReadable(name), remainingDuration / 60, remainingDuration % 60));
 
+    }
+
+    public NamespacedKey getKey() {
+        return key;
+    }
+
+    public void setKey(NamespacedKey key) {
+        this.key = key;
     }
 }

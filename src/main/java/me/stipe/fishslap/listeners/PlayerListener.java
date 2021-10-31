@@ -156,6 +156,23 @@ public class PlayerListener implements Listener {
                 event.setCancelled(true);
     }
 
+    /*
+    if we're not actively playing, we shouldn't be damaged by another player.
+    */
+    @EventHandler
+    public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
+            Player target = (Player) event.getEntity();
+            Player slapper = (Player) event.getDamager();
+            Fish fish = Fish.getFromItemStack(slapper.getInventory().getItemInMainHand(), slapper);
+            if (!FSApi.getPlayerManager().isPlaying(target) 
+            || !FSApi.getPlayerManager().isPlaying(slapper)
+            || null == fish) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
 
     @EventHandler
     public void onPlayerDeath(EntityDamageByEntityEvent event) {

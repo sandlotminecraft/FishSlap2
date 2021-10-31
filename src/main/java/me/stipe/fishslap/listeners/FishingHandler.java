@@ -1,6 +1,5 @@
 package me.stipe.fishslap.listeners;
 
-import lombok.Getter;
 import me.stipe.fishslap.FSApi;
 import me.stipe.fishslap.managers.PlayerManager;
 import me.stipe.fishslap.managers.PowerupManager;
@@ -42,7 +41,6 @@ public class FishingHandler implements Listener {
         addPowerupsToLoot();
     }
 
-    @Getter
     private class FishingLoot {
         ItemStack item;
         int chance;
@@ -52,6 +50,16 @@ public class FishingHandler implements Listener {
             this.item = item;
             this.chance = chance;
             this.playersOnly = playersOnly;
+        }
+
+        public int getChance() {
+            return chance;
+        }
+        public ItemStack getItem() {
+            return item;
+        }
+        public boolean isPlayersOnly() {
+            return playersOnly;
         }
     }
 
@@ -121,7 +129,7 @@ public class FishingHandler implements Listener {
                     }
                     Enchantment enchant = EnchantmentWrapper.getByKey(NamespacedKey.minecraft(args[i].toLowerCase()));
                     if (enchant != null) {
-                        System.out.println("Enchant:" + enchant.getName());
+                        System.out.println("Enchant:" + enchant.getKey());
                         int level = 1;
                         if (args.length > i + 1) {
                             i++;
