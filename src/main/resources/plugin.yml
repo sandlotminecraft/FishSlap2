@@ -1,5 +1,16 @@
+
 name: FishSlap
 version: 1.16.1
 main: me.stipe.fishslap.FishSlap
 author: cheracc
-api-version: 1.15
+api-version: 1.16
+commands:
+  givefish:
+    description: give a player a fish...
+    usage: /givefish <type> <level> [player]
+    permission: fishslap.givefish
+    permission-message: You don't have permission to do that.
+permissions:
+  fishslap.givefish:
+    description: "allows givefish command"
+    default: false

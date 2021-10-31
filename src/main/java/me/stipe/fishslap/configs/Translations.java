@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Translations {
+    private final String giveFishFailed = "&e[&6FishSlap&e] that didn't work. (%s)";
+    private final String playerInventoryFull = "&e[&6FishSlap&e] %s's inventory is full.";
     private final String spectatorBossBarTitle = "&eJoining FishSlap in %s seconds";
     private final String spectatorBoardTitle = "&6&lCome Play FishSlap!";
     private final String topScoresTitle = "&e&lFishSlap Top Scores&r";
@@ -124,5 +126,13 @@ public class Translations {
 
     public String getActionBarPlayerKillingBlow() {
         return actionBarPlayerKillingBlow;
+    }
+
+    public String getPlayerInventoryFull() {
+        return playerInventoryFull;
+    }
+
+    public String getGiveFishFailed() {
+        return giveFishFailed;
     }
 }

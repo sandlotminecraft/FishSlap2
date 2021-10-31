@@ -17,11 +17,3 @@ FishSlap is a quirky and fun PvP game intended to bring life to your server netw
 ## Configuring FishSlap
 There are several FishSlap configuration files:
 ## FishSlap Commands
-## Get FishSlap
-FishSlap is currently in an ALPHA phase. You WILL find bugs and partially-implemented systems. You can get the latest version here:
-
-[Latest FishSlap .jar](http://home.stipe.me/job/FishSlap/lastSuccessfulBuild/artifact/target/FishSlap2-1.16.1.jar)
-
-Previous versions can be found on Jenkins:
-
-[FishSlap Jenkins Build Server](http://home.stipe.me/job/FishSlap/)

@@ -399,8 +399,9 @@ public class Fish implements Listener {
         if (fish == null || !event.getAction().name().toLowerCase().contains("right"))
             return;
 
-// debug        if (!fish.hasCooldown())
+        if (!fish.hasCooldown()) {
             fish.doUseEffect();
+        }
 
     }
 

@@ -43,7 +43,7 @@ public class PlayerListener implements Listener {
             changeEvent.callEvent();
         }
 
-        /* debug */
+/*
         {
             for (ItemStack item : p.getInventory().getContents()) {
                 if (item != null && (item.getType() == Material.COD || item.getType() == Material.TROPICAL_FISH || item.getType() == Material.SALMON || item.getType() == Material.PUFFERFISH))
@@ -72,6 +72,7 @@ public class PlayerListener implements Listener {
             p.getInventory().addItem(new Fish(Material.PUFFERFISH, 5, 256, p).generateItem());
             p.getInventory().addItem(new Fish(Material.PUFFERFISH, 10, 1502, p).generateItem());
         }
+*/
     }
 
     @EventHandler
